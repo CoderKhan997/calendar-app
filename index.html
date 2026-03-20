@@ -6,56 +6,91 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Calendar App</title>
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&family=Michroma&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
   <style>
-    /* ── Tokens ─────────────────────────────────────────────── */
+    /* ── Tokens ──────────────────────────────────────────────── */
     :root {
       --primary:        #A8C5DA;
       --primary-dark:   #7BA7BC;
       --secondary:      #C3B1E1;
-      --secondary-dark: #9D8EC4;
       --bg:             #F9F6FF;
       --surface:        #FFFFFF;
       --surface2:       #EDE9F8;
       --on-surface:     #1E1B2E;
       --on-surface-dim: #6B6880;
-      --today-ring:     #A8C5DA;
-      --radius-full:    50%;
-      --radius-card:    20px;
-      --radius-sm:      12px;
       --shadow:         0 2px 12px rgba(0,0,0,.08);
       --transition:     .25s ease;
+      --font-ui:        'Google Sans', 'Roboto', sans-serif;
+      --radius-card:    20px;
+      --radius-sm:      12px;
     }
     [data-theme="dark"] {
       --primary:        #7BA7BC;
       --primary-dark:   #5C8EA3;
       --secondary:      #9D8EC4;
-      --secondary-dark: #7B6CA8;
       --bg:             #1E1B2E;
       --surface:        #2A2640;
       --surface2:       #332F50;
       --on-surface:     #EDE9F8;
       --on-surface-dim: #9D99B8;
-      --today-ring:     #7BA7BC;
       --shadow:         0 2px 16px rgba(0,0,0,.35);
     }
 
-    /* ── Reset / Base ───────────────────────────────────────── */
+    /* ── Reset ───────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button, input { font-family: inherit; }
+
     body {
-      font-family: 'Google Sans', 'Roboto', sans-serif;
-      background: var(--bg);
+      font-family: var(--font-ui);
+      background-color: var(--bg);
       color: var(--on-surface);
       min-height: 100dvh;
-      transition: background var(--transition), color var(--transition);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 40px;
+      padding: 24px 16px 48px;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: background-color var(--transition), color var(--transition);
+      overflow-y: scroll; /* prevents layout shift from scrollbar appearing */
     }
 
-    /* ── Top bar ────────────────────────────────────────────── */
+    /* ── Background image overlay ─────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      transition: background var(--transition);
+    }
+    body.has-bg::before { background: rgba(249,246,255,0.55); }
+    [data-theme="dark"] body.has-bg::before { background: rgba(30,27,46,0.65); }
+
+    body > * { position: relative; z-index: 1; }
+
+    body.has-bg .card {
+      background: rgba(255,255,255,0.76);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    [data-theme="dark"] body.has-bg .card {
+      background: rgba(42,38,64,0.76);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    body.has-bg .settings-panel {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255,255,255,0.88);
+    }
+    [data-theme="dark"] body.has-bg .settings-panel {
+      background: rgba(42,38,64,0.88);
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────── */
     .topbar {
       width: 100%;
       max-width: 480px;
@@ -70,6 +105,13 @@
       color: var(--primary);
       letter-spacing: -.3px;
     }
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* ── Icon button ─────────────────────────────────────────── */
     .icon-btn {
       background: var(--surface);
       border: none;
@@ -79,12 +121,197 @@
       cursor: pointer;
       box-shadow: var(--shadow);
       color: var(--on-surface);
+      flex-shrink: 0;
       transition: background var(--transition), transform .1s;
     }
     .icon-btn:hover  { background: var(--surface2); }
     .icon-btn:active { transform: scale(.93); }
 
-    /* ── Card ───────────────────────────────────────────────── */
+    /* ── Settings panel ──────────────────────────────────────── */
+    .settings-wrap { position: relative; }
+
+    .settings-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 296px;
+      background: var(--surface);
+      border-radius: 20px;
+      box-shadow: 0 8px 36px rgba(0,0,0,.18);
+      padding: 20px;
+      z-index: 500;
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+      pointer-events: none;
+      transform-origin: top right;
+      transition: opacity .22s cubic-bezier(.4,0,.2,1),
+                  transform .22s cubic-bezier(.4,0,.2,1);
+    }
+    .settings-panel.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: all;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .settings-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .settings-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--on-surface-dim);
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+    }
+    .settings-close:hover { background: var(--surface2); color: var(--on-surface); }
+
+    .settings-section { margin-bottom: 20px; }
+    .settings-section:last-child { margin-bottom: 0; }
+
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--on-surface-dim);
+      margin-bottom: 10px;
+    }
+
+    /* Divider between sections */
+    .settings-divider {
+      border: none;
+      border-top: 1px solid var(--surface2);
+      margin: 16px 0;
+    }
+
+    /* ── Font options ─────────────────────────────────────────── */
+    .font-options { display: flex; flex-direction: column; gap: 5px; }
+
+    .font-btn {
+      background: transparent;
+      border: 1.5px solid var(--surface2);
+      border-radius: 10px;
+      padding: 9px 13px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13.5px;
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color .15s, background .15s;
+    }
+    .font-btn:hover  { border-color: var(--primary); background: var(--surface2); }
+    .font-btn.active { border-color: var(--primary); background: var(--surface2); }
+    .font-btn .check {
+      font-size: 16px;
+      color: var(--primary);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .font-btn.active .check { opacity: 1; }
+
+    /* ── Accent color ─────────────────────────────────────────── */
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .color-wheel-wrap {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: conic-gradient(
+        hsl(0,85%,65%) 0deg,
+        hsl(30,85%,65%) 40deg,
+        hsl(60,85%,65%) 80deg,
+        hsl(120,75%,60%) 130deg,
+        hsl(180,75%,55%) 180deg,
+        hsl(210,75%,60%) 210deg,
+        hsl(240,75%,65%) 240deg,
+        hsl(280,75%,65%) 280deg,
+        hsl(320,80%,65%) 320deg,
+        hsl(360,85%,65%) 360deg
+      );
+      padding: 3px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: transform .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .color-wheel-wrap:hover { transform: scale(1.1); }
+    .color-wheel-center {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: var(--surface);
+      pointer-events: none;
+    }
+    #accentColorInput {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+    }
+    .color-swatch-large {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid var(--surface2);
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .color-hint { font-size: 12px; color: var(--on-surface-dim); line-height: 1.3; }
+
+    /* ── Background upload ────────────────────────────────────── */
+    .bg-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .bg-upload-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: none;
+      border-radius: 10px;
+      padding: 9px 13px;
+      font-size: 13px;
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .bg-upload-label:hover { background: var(--primary); color: #fff; }
+    #bgInput { display: none; }
+
+    #removeBgBtn {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      border: 1.5px solid var(--surface2);
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-size: 13px;
+      color: var(--on-surface-dim);
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    #removeBgBtn:hover { border-color: #F4A9A8; color: #C0605F; }
+    #removeBgBtn.visible { display: flex; }
+
+    /* ── Card ────────────────────────────────────────────────── */
     .card {
       background: var(--surface);
       border-radius: var(--radius-card);
@@ -95,20 +322,16 @@
       transition: background var(--transition), box-shadow var(--transition);
     }
 
-    /* ── Month nav ──────────────────────────────────────────── */
+    /* ── Month nav ───────────────────────────────────────────── */
     .month-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-    .month-label {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -.2px;
-    }
+    .month-label { font-size: 18px; font-weight: 600; letter-spacing: -.2px; }
 
-    /* ── Day-of-week header ─────────────────────────────────── */
+    /* ── DOW header ──────────────────────────────────────────── */
     .dow-row {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -122,7 +345,7 @@
       padding: 4px 0;
     }
 
-    /* ── Day grid ───────────────────────────────────────────── */
+    /* ── Day grid ────────────────────────────────────────────── */
     .day-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -136,22 +359,22 @@
     }
     .day-btn {
       width: 36px; height: 36px;
-      border-radius: var(--radius-full);
+      border-radius: 50%;
       border: none;
       background: transparent;
       color: var(--on-surface);
-      font-family: inherit;
       font-size: 14px;
       font-weight: 400;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       transition: background .15s, color .15s, transform .1s;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
     }
-    .day-btn:hover { background: var(--surface2); }
-    .day-btn:active { transform: scale(.9); }
+    .day-btn:hover  { background: var(--surface2); }
+    .day-btn:active { transform: scale(.88); }
+    .day-btn:focus  { outline: none; }
+    .day-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
     .day-btn.today {
       background: var(--primary);
@@ -167,39 +390,40 @@
     .day-btn.has-event::after {
       content: '';
       position: absolute;
-      bottom: 4px;
+      bottom: 3px;
       left: 50%;
       transform: translateX(-50%);
       width: 4px; height: 4px;
       border-radius: 50%;
       background: var(--secondary);
     }
-    .day-btn.today.has-event::after { background: #fff; }
+    .day-btn.today.has-event::after  { background: rgba(255,255,255,.75); }
+    .day-btn.selected.has-event::after { background: rgba(255,255,255,.75); }
 
-    /* ── Event panel ────────────────────────────────────────── */
+    /* ── Event panel ─────────────────────────────────────────── */
     .event-panel {
       margin-top: 16px;
       background: var(--surface2);
       border-radius: var(--radius-sm);
-      padding: 16px;
-      min-height: 56px;
+      padding: 14px 16px;
+      min-height: 54px;
       transition: background var(--transition);
     }
     .event-panel-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
       color: var(--on-surface-dim);
       margin-bottom: 10px;
     }
-    .event-list { display: flex; flex-direction: column; gap: 8px; }
+    .event-list { display: flex; flex-direction: column; gap: 7px; }
     .event-item {
       display: flex;
       align-items: center;
       gap: 10px;
       background: var(--surface);
       border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
+      padding: 9px 13px;
+      font-size: 13.5px;
       box-shadow: var(--shadow);
     }
     .event-dot {
@@ -207,25 +431,53 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
+    .event-text { flex: 1; }
     .event-none {
       font-size: 13px;
       color: var(--on-surface-dim);
       text-align: center;
-      padding: 6px 0;
+      padding: 4px 0;
     }
 
-    /* ── Add event ──────────────────────────────────────────── */
+    /* ── Add row ─────────────────────────────────────────────── */
     .add-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-top: 12px;
+      align-items: center;
     }
+
+    /* Event color swatch */
+    .event-color-pick {
+      position: relative;
+      width: 36px; height: 36px;
+      flex-shrink: 0;
+    }
+    .event-color-swatch {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2.5px solid var(--surface2);
+      pointer-events: none;
+      transition: transform .1s, border-color .15s;
+    }
+    .event-color-pick:hover .event-color-swatch { transform: scale(1.1); border-color: var(--primary); }
+    #eventColorInput {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+    }
+
     .add-input {
       flex: 1;
       border: none;
       border-radius: var(--radius-sm);
       padding: 10px 14px;
-      font-family: inherit;
       font-size: 14px;
       background: var(--surface);
       color: var(--on-surface);
@@ -245,13 +497,13 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       box-shadow: 0 3px 10px rgba(0,0,0,.18);
-      transition: background .15s, transform .1s;
       flex-shrink: 0;
+      transition: background .15s, transform .1s;
     }
     .fab:hover  { background: var(--primary-dark); }
     .fab:active { transform: scale(.92); }
 
-    /* ── Mini strip (month overview) ────────────────────────── */
+    /* ── Strip ───────────────────────────────────────────────── */
     .strip-label {
       font-size: 12px;
       font-weight: 500;
@@ -269,33 +521,27 @@
       overflow-x: auto;
       padding-bottom: 4px;
       scrollbar-width: none;
+      /* no scroll-behavior here — we set scrollLeft directly */
     }
     .strip::-webkit-scrollbar { display: none; }
-    .strip-day {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .strip-dow {
-      font-size: 11px;
-      color: var(--on-surface-dim);
-      font-weight: 500;
-    }
+
+    .strip-day { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+    .strip-dow { font-size: 11px; color: var(--on-surface-dim); font-weight: 500; }
     .strip-num {
-      width: 32px; height: 32px;
-      border-radius: var(--radius-full);
+      width: 30px; height: 30px;
+      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: background .15s;
       color: var(--on-surface);
+      position: relative;
+      transition: background .15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .strip-num:hover    { background: var(--surface2); }
-    .strip-num.s-today  { background: var(--primary); color: #fff; }
-    .strip-num.s-sel    { background: var(--secondary); color: #fff; }
+    .strip-num:hover            { background: var(--surface2); }
+    .strip-num.s-today          { background: var(--primary); color: #fff; }
+    .strip-num.s-sel:not(.s-today) { background: var(--secondary); color: #fff; }
     .strip-num.s-event::after {
       content: '';
       position: absolute;
@@ -303,22 +549,112 @@
       width: 4px; height: 4px; border-radius: 50%;
       background: var(--secondary);
     }
-    .strip-num { position: relative; }
+    .strip-num.s-today.s-event::after,
+    .strip-num.s-sel.s-event::after { background: rgba(255,255,255,.75); }
   </style>
 </head>
 <body>
 
-  <!-- Top bar -->
+  <!-- ── Top bar ── -->
   <div class="topbar">
     <span class="app-title">Calendar</span>
-    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
-      <span class="material-icons-round" id="themeIcon">dark_mode</span>
-    </button>
+    <div class="top-actions">
+
+      <!-- Settings cog -->
+      <div class="settings-wrap">
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+          <span class="material-icons-round">settings</span>
+        </button>
+
+        <div class="settings-panel" id="settingsPanel" role="dialog" aria-label="Settings">
+          <div class="settings-header">
+            <span class="settings-title">Settings</span>
+            <button class="settings-close" id="settingsClose" aria-label="Close settings">
+              <span class="material-icons-round" style="font-size:18px">close</span>
+            </button>
+          </div>
+
+          <!-- Font -->
+          <div class="settings-section">
+            <div class="section-label">Font</div>
+            <div class="font-options" id="fontOptions">
+              <button class="font-btn active"
+                data-font="'Google Sans','Roboto',sans-serif"
+                style="font-family:'Google Sans','Roboto',sans-serif">
+                Google Sans
+                <span class="material-icons-round check">check</span>
+              </button>
+              <button class="font-btn"
+                data-font="'Michroma',sans-serif"
+                style="font-family:'Michroma',sans-serif">
+                Michroma
+                <span class="material-icons-round check">check</span>
+              </button>
+              <button class="font-btn"
+                data-font="'Calibri','Gill Sans',sans-serif"
+                style="font-family:'Calibri','Gill Sans',sans-serif">
+                Calibri
+                <span class="material-icons-round check">check</span>
+              </button>
+              <button class="font-btn"
+                data-font="'Cambria','Georgia',serif"
+                style="font-family:'Cambria','Georgia',serif">
+                Cambria
+                <span class="material-icons-round check">check</span>
+              </button>
+              <button class="font-btn"
+                data-font="'Segoe Script','Brush Script MT',cursive"
+                style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15px">
+                Segoe Script
+                <span class="material-icons-round check">check</span>
+              </button>
+            </div>
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Accent color -->
+          <div class="settings-section">
+            <div class="section-label">Accent Color</div>
+            <div class="color-row">
+              <div class="color-wheel-wrap" title="Open color picker">
+                <div class="color-wheel-center"></div>
+                <input type="color" id="accentColorInput" value="#A8C5DA" />
+              </div>
+              <div class="color-swatch-large" id="colorSwatchLarge"></div>
+              <span class="color-hint">Tap the<br>wheel to pick</span>
+            </div>
+          </div>
+
+          <hr class="settings-divider" />
+
+          <!-- Background image -->
+          <div class="settings-section">
+            <div class="section-label">Background Image</div>
+            <div class="bg-controls">
+              <label class="bg-upload-label">
+                <span class="material-icons-round" style="font-size:18px">add_photo_alternate</span>
+                Choose Image
+                <input type="file" id="bgInput" accept="image/*" />
+              </label>
+              <button id="removeBgBtn">
+                <span class="material-icons-round" style="font-size:16px">hide_image</span>
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme toggle -->
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="material-icons-round" id="themeIcon">dark_mode</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Main card -->
+  <!-- ── Main card ── -->
   <div class="card">
-    <!-- Month navigation -->
     <div class="month-nav">
       <button class="icon-btn" id="prevBtn" aria-label="Previous month">
         <span class="material-icons-round">chevron_left</span>
@@ -328,86 +664,96 @@
         <span class="material-icons-round">chevron_right</span>
       </button>
     </div>
-
-    <!-- Days of week -->
-    <div class="dow-row" id="dowRow"></div>
-
-    <!-- Day grid -->
+    <div class="dow-row"  id="dowRow"></div>
     <div class="day-grid" id="dayGrid"></div>
 
-    <!-- Event panel -->
     <div class="event-panel">
-      <div class="event-panel-title" id="eventTitle">Events</div>
+      <div class="event-panel-title" id="eventTitle"></div>
       <div class="event-list" id="eventList"></div>
     </div>
 
-    <!-- Add event -->
     <div class="add-row">
-      <input class="add-input" id="eventInput" placeholder="Add event…" maxlength="60" />
+      <!-- Event color pick -->
+      <div class="event-color-pick" title="Pick event colour">
+        <div class="event-color-swatch" id="eventColorSwatch"></div>
+        <input type="color" id="eventColorInput" value="#A8C5DA" />
+      </div>
+      <input class="add-input" id="eventInput" placeholder="Add event…" maxlength="80" />
       <button class="fab" id="addBtn" aria-label="Add event">
         <span class="material-icons-round">add</span>
       </button>
     </div>
   </div>
 
-  <!-- Strip -->
+  <!-- ── Strip ── -->
   <div class="strip-label" id="stripLabel"></div>
   <div class="strip" id="strip"></div>
 
   <script>
-    // ── State ──────────────────────────────────────────────────
-    const today  = new Date();
-    let current  = new Date(today.getFullYear(), today.getMonth(), 1);
-    let selected = new Date(today);
-    const events = {};   // { 'YYYY-MM-DD': [{text, color}] }
+    /* ── State ──────────────────────────────────────────────── */
+    const TODAY   = new Date();
+    let   current = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    let   selected= new Date(TODAY);
+    const events  = {};   // { 'YYYY-MM-DD': [{text, color}] }
 
     const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const MONTHS = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
-    const COLORS = ['#A8C5DA','#C3B1E1','#B5D5C5','#F4A9A8','#F9D8A0','#A8D5E2'];
 
-    // ── Helpers ────────────────────────────────────────────────
-    const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const isToday = d => key(d) === key(today);
+    /* ── Helpers ────────────────────────────────────────────── */
+    const key     = d => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    const p2      = n => String(n).padStart(2,'0');
+    const isToday = d => key(d) === key(TODAY);
     const isSel   = d => key(d) === key(selected);
 
-    // ── Render calendar ────────────────────────────────────────
+    function darken(hex, amt) {
+      const n = parseInt(hex.replace('#',''), 16);
+      const r = Math.round(((n >> 16) & 0xff) * (1 - amt));
+      const g = Math.round(((n >>  8) & 0xff) * (1 - amt));
+      const b = Math.round(( n        & 0xff) * (1 - amt));
+      return `#${p2(r.toString(16))}${p2(g.toString(16))}${p2(b.toString(16))}`;
+    }
+
+    /* ── Render calendar ────────────────────────────────────── */
     function render() {
       const year  = current.getFullYear();
       const month = current.getMonth();
       const start = new Date(year, month, 1).getDay();
-      const days  = new Date(year, month + 1, 0).getDate();
+      const total = new Date(year, month + 1, 0).getDate();
 
       document.getElementById('monthLabel').textContent = `${MONTHS[month]} ${year}`;
 
       // DOW header
-      const dowRow = document.getElementById('dowRow');
-      dowRow.innerHTML = DAYS.map(d => `<div class="dow-cell">${d}</div>`).join('');
+      document.getElementById('dowRow').innerHTML =
+        DAYS.map(d => `<div class="dow-cell">${d}</div>`).join('');
 
       // Day grid
       const grid = document.getElementById('dayGrid');
       grid.innerHTML = '';
 
       for (let i = 0; i < start; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        grid.appendChild(cell);
+        grid.insertAdjacentHTML('beforeend', '<div class="day-cell"></div>');
       }
-
-      for (let d = 1; d <= days; d++) {
+      for (let d = 1; d <= total; d++) {
         const date = new Date(year, month, d);
         const k    = key(date);
+        const cls  = ['day-btn',
+          isToday(date) ? 'today' : '',
+          !isToday(date) && isSel(date) ? 'selected' : '',
+          events[k]?.length ? 'has-event' : ''
+        ].filter(Boolean).join(' ');
+
         const cell = document.createElement('div');
         cell.className = 'day-cell';
-
         const btn = document.createElement('button');
-        btn.className = 'day-btn' +
-          (isToday(date) ? ' today' : '') +
-          (isSel(date) && !isToday(date) ? ' selected' : '') +
-          (events[k]?.length ? ' has-event' : '');
+        btn.className = cls;
         btn.textContent = d;
-        btn.addEventListener('click', () => { selected = date; render(); renderEvents(); });
-
+        btn.addEventListener('click', () => {
+          btn.blur();                     // prevent focus-triggered page scroll
+          selected = date;
+          render();
+          renderEvents();
+        });
         cell.appendChild(btn);
         grid.appendChild(cell);
       }
@@ -415,56 +761,59 @@
       renderStrip();
     }
 
-    // ── Render events panel ────────────────────────────────────
+    /* ── Render events ──────────────────────────────────────── */
     function renderEvents() {
       const k    = key(selected);
       const list = events[k] || [];
-      const opts = { weekday:'long', month:'long', day:'numeric' };
       document.getElementById('eventTitle').textContent =
-        selected.toLocaleDateString(undefined, opts);
-
-      const el = document.getElementById('eventList');
-      el.innerHTML = list.length
-        ? list.map(e => `
-            <div class="event-item">
-              <span class="event-dot" style="background:${e.color}"></span>
-              ${e.text}
-            </div>`).join('')
+        selected.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+      document.getElementById('eventList').innerHTML = list.length
+        ? list.map(e =>
+            `<div class="event-item">
+               <span class="event-dot" style="background:${e.color}"></span>
+               <span class="event-text">${e.text}</span>
+             </div>`).join('')
         : '<div class="event-none">No events — add one below</div>';
     }
 
-    // ── Add event ──────────────────────────────────────────────
-    document.getElementById('addBtn').addEventListener('click', addEvent);
-    document.getElementById('eventInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') addEvent();
-    });
-
+    /* ── Add event ──────────────────────────────────────────── */
     function addEvent() {
       const input = document.getElementById('eventInput');
       const text  = input.value.trim();
       if (!text) return;
-      const k = key(selected);
+      const k     = key(selected);
+      const color = document.getElementById('eventColorInput').value;
       if (!events[k]) events[k] = [];
-      const color = COLORS[events[k].length % COLORS.length];
       events[k].push({ text, color });
       input.value = '';
       render();
       renderEvents();
     }
+    document.getElementById('addBtn').addEventListener('click', addEvent);
+    document.getElementById('eventInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addEvent();
+    });
 
-    // ── Strip ──────────────────────────────────────────────────
+    // Sync event colour swatch preview
+    const evColorInput  = document.getElementById('eventColorInput');
+    const evColorSwatch = document.getElementById('eventColorSwatch');
+    evColorSwatch.style.background = evColorInput.value;
+    evColorInput.addEventListener('input', () => {
+      evColorSwatch.style.background = evColorInput.value;
+    });
+
+    /* ── Strip ──────────────────────────────────────────────── */
     function renderStrip() {
       const year  = current.getFullYear();
       const month = current.getMonth();
-      const days  = new Date(year, month + 1, 0).getDate();
+      const total = new Date(year, month + 1, 0).getDate();
 
-      document.getElementById('stripLabel').textContent =
-        `${MONTHS[month]} at a glance`;
+      document.getElementById('stripLabel').textContent = `${MONTHS[month]} at a glance`;
 
       const strip = document.getElementById('strip');
       strip.innerHTML = '';
 
-      for (let d = 1; d <= days; d++) {
+      for (let d = 1; d <= total; d++) {
         const date = new Date(year, month, d);
         const k    = key(date);
 
@@ -476,36 +825,120 @@
         dow.textContent = DAYS[date.getDay()][0];
 
         const num = document.createElement('div');
-        num.className = 'strip-num' +
-          (isToday(date) ? ' s-today' : '') +
-          (isSel(date) && !isToday(date) ? ' s-sel' : '') +
-          (events[k]?.length ? ' s-event' : '');
+        num.className = ['strip-num',
+          isToday(date) ? 's-today' : '',
+          !isToday(date) && isSel(date) ? 's-sel' : '',
+          events[k]?.length ? 's-event' : ''
+        ].filter(Boolean).join(' ');
         num.textContent = d;
-        num.addEventListener('click', () => { selected = date; render(); renderEvents(); });
+        num.addEventListener('click', () => {
+          selected = date;
+          render();
+          renderEvents();
+        });
 
         wrap.appendChild(dow);
         wrap.appendChild(num);
         strip.appendChild(wrap);
       }
 
-      // scroll selected day into view
-      const idx = selected.getMonth() === month && selected.getFullYear() === year
-        ? selected.getDate() - 1 : 0;
-      const target = strip.children[Math.max(idx - 2, 0)];
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      // Scroll strip only — never the page
+      const selYear  = selected.getFullYear();
+      const selMonth = selected.getMonth();
+      if (selYear === year && selMonth === month) {
+        const idx    = selected.getDate() - 1;
+        const target = strip.children[Math.max(idx - 2, 0)];
+        if (target) strip.scrollLeft = target.offsetLeft - 16;
+      }
     }
 
-    // ── Month nav ──────────────────────────────────────────────
-    document.getElementById('prevBtn').addEventListener('click', () => {
+    /* ── Month nav ──────────────────────────────────────────── */
+    document.getElementById('prevBtn').addEventListener('click', e => {
+      e.preventDefault();
+      e.currentTarget.blur();
       current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
       render(); renderEvents();
     });
-    document.getElementById('nextBtn').addEventListener('click', () => {
+    document.getElementById('nextBtn').addEventListener('click', e => {
+      e.preventDefault();
+      e.currentTarget.blur();
       current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
       render(); renderEvents();
     });
 
-    // ── Dark / light mode ──────────────────────────────────────
+    /* ── Settings panel ─────────────────────────────────────── */
+    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsBtn   = document.getElementById('settingsBtn');
+
+    settingsBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      settingsPanel.classList.toggle('open');
+    });
+    document.getElementById('settingsClose').addEventListener('click', () => {
+      settingsPanel.classList.remove('open');
+    });
+    document.addEventListener('click', e => {
+      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+        settingsPanel.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') settingsPanel.classList.remove('open');
+    });
+    // Prevent panel-internal clicks from closing it
+    settingsPanel.addEventListener('click', e => e.stopPropagation());
+
+    /* ── Font selection ─────────────────────────────────────── */
+    document.getElementById('fontOptions').addEventListener('click', e => {
+      const btn = e.target.closest('.font-btn');
+      if (!btn) return;
+      document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.documentElement.style.setProperty('--font-ui', btn.dataset.font);
+    });
+
+    /* ── Accent colour ──────────────────────────────────────── */
+    const accentInput    = document.getElementById('accentColorInput');
+    const colorSwatch    = document.getElementById('colorSwatchLarge');
+
+    function applyAccent(hex) {
+      document.documentElement.style.setProperty('--primary',      hex);
+      document.documentElement.style.setProperty('--primary-dark', darken(hex, 0.15));
+      colorSwatch.style.background = hex;
+      // Also update the event colour picker default if untouched
+      if (evColorInput.value === evColorInput.defaultValue) {
+        evColorInput.value = hex;
+        evColorSwatch.style.background = hex;
+      }
+      accentInput.defaultValue = hex;
+    }
+
+    colorSwatch.style.background = accentInput.value;
+    accentInput.addEventListener('input', () => applyAccent(accentInput.value));
+
+    /* ── Background image ───────────────────────────────────── */
+    const removeBgBtn = document.getElementById('removeBgBtn');
+    let bgObjectURL   = null;
+
+    document.getElementById('bgInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (bgObjectURL) URL.revokeObjectURL(bgObjectURL);
+      bgObjectURL = URL.createObjectURL(file);
+      document.body.style.backgroundImage = `url('${bgObjectURL}')`;
+      document.body.classList.add('has-bg');
+      removeBgBtn.classList.add('visible');
+    });
+
+    removeBgBtn.addEventListener('click', () => {
+      document.body.style.backgroundImage = '';
+      document.body.classList.remove('has-bg');
+      removeBgBtn.classList.remove('visible');
+      document.getElementById('bgInput').value = '';
+      if (bgObjectURL) { URL.revokeObjectURL(bgObjectURL); bgObjectURL = null; }
+    });
+
+    /* ── Dark / light mode ──────────────────────────────────── */
     const html = document.documentElement;
     const pref = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -513,15 +946,13 @@
       html.setAttribute('data-theme', dark ? 'dark' : 'light');
       document.getElementById('themeIcon').textContent = dark ? 'light_mode' : 'dark_mode';
     }
-
     applyTheme(pref.matches);
     pref.addEventListener('change', e => applyTheme(e.matches));
-
     document.getElementById('themeToggle').addEventListener('click', () => {
       applyTheme(html.getAttribute('data-theme') !== 'dark');
     });
 
-    // ── Init ───────────────────────────────────────────────────
+    /* ── Init ───────────────────────────────────────────────── */
     render();
     renderEvents();
   </script>
