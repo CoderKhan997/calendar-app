@@ -278,23 +278,54 @@
     .color-hint { font-size: 12px; color: var(--on-surface-dim); line-height: 1.3; }
 
     /* ── Background upload ────────────────────────────────────── */
-    .bg-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .bg-controls {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
 
     .bg-upload-label {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 4px;
       background: var(--surface2);
       border: none;
       border-radius: 10px;
-      padding: 9px 13px;
-      font-size: 13px;
+      padding: 10px 13px;
+      font-size: 11.5px;
       color: var(--on-surface);
       cursor: pointer;
+      text-align: center;
+      flex: 1;
       transition: background .15s, color .15s;
     }
     .bg-upload-label:hover { background: var(--primary); color: #fff; }
     #bgInput { display: none; }
+
+    .drop-zone {
+      flex: 1;
+      border: 2px dashed var(--surface2);
+      border-radius: 10px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 11.5px;
+      color: var(--on-surface-dim);
+      text-align: center;
+      cursor: default;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .drop-zone.drag-over {
+      border-color: var(--primary);
+      border-style: solid;
+      background: var(--surface2);
+      color: var(--on-surface);
+    }
 
     #removeBgBtn {
       display: none;
@@ -307,10 +338,25 @@
       font-size: 13px;
       color: var(--on-surface-dim);
       cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+      justify-content: center;
       transition: border-color .15s, color .15s;
     }
     #removeBgBtn:hover { border-color: #F4A9A8; color: #C0605F; }
     #removeBgBtn.visible { display: flex; }
+
+    /* ── Michroma font optimisations ─────────────────────────── */
+    body.font-michroma .app-title         { font-size: 17px; letter-spacing: -0.04em; }
+    body.font-michroma .month-label       { font-size: 15px; letter-spacing: -0.04em; }
+    body.font-michroma .dow-cell          { font-size: 10px; letter-spacing: -0.03em; }
+    body.font-michroma .day-btn           { font-size: 11.5px; letter-spacing: -0.02em; }
+    body.font-michroma .event-panel-title { font-size: 11px;  letter-spacing: -0.02em; }
+    body.font-michroma .event-item        { font-size: 12px;  letter-spacing: -0.02em; }
+    body.font-michroma .add-input         { font-size: 12px;  letter-spacing: -0.01em; }
+    body.font-michroma .strip-label       { font-size: 10px;  letter-spacing: -0.03em; }
+    body.font-michroma .strip-dow         { font-size: 9px;   letter-spacing:  0;      }
+    body.font-michroma .strip-num         { font-size: 10.5px;letter-spacing: -0.02em; }
 
     /* ── Card ────────────────────────────────────────────────── */
     .card {
@@ -649,15 +695,19 @@
             <div class="section-label">Background Image</div>
             <div class="bg-controls">
               <label class="bg-upload-label">
-                <span class="material-icons-round" style="font-size:18px">add_photo_alternate</span>
-                Choose Image
+                <span class="material-icons-round" style="font-size:20px">add_photo_alternate</span>
+                Choose image
                 <input type="file" id="bgInput" accept="image/*" />
               </label>
-              <button id="removeBgBtn">
-                <span class="material-icons-round" style="font-size:16px">hide_image</span>
-                Remove
-              </button>
+              <div class="drop-zone" id="dropZone">
+                <span class="material-icons-round" style="font-size:20px">photo_library</span>
+                Drop photo here
+              </div>
             </div>
+            <button id="removeBgBtn">
+              <span class="material-icons-round" style="font-size:16px">hide_image</span>
+              Remove background
+            </button>
           </div>
         </div>
       </div>
@@ -929,6 +979,7 @@
       document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.documentElement.style.setProperty('--font-ui', btn.dataset.font);
+      document.body.classList.toggle('font-michroma', btn.dataset.font.startsWith("'Michroma'"));
     });
 
     /* ── Accent colour ──────────────────────────────────────── */
@@ -954,14 +1005,22 @@
     const removeBgBtn = document.getElementById('removeBgBtn');
     let bgObjectURL   = null;
 
-    document.getElementById('bgInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (bgObjectURL) URL.revokeObjectURL(bgObjectURL);
-      bgObjectURL = URL.createObjectURL(file);
-      document.body.style.backgroundImage = `url('${bgObjectURL}')`;
+    function applyBgUrl(url) {
+      document.body.style.backgroundImage = `url('${url}')`;
       document.body.classList.add('has-bg');
       removeBgBtn.classList.add('visible');
+    }
+
+    function applyBgFile(file) {
+      if (!file.type.startsWith('image/')) return;
+      if (bgObjectURL) URL.revokeObjectURL(bgObjectURL);
+      bgObjectURL = URL.createObjectURL(file);
+      applyBgUrl(bgObjectURL);
+    }
+
+    document.getElementById('bgInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) applyBgFile(file);
     });
 
     removeBgBtn.addEventListener('click', () => {
@@ -971,6 +1030,47 @@
       document.getElementById('bgInput').value = '';
       if (bgObjectURL) { URL.revokeObjectURL(bgObjectURL); bgObjectURL = null; }
     });
+
+    /* ── Drag-and-drop background ───────────────────────────── */
+    const dropZone = document.getElementById('dropZone');
+
+    // Also allow dropping anywhere on the page body
+    [dropZone, document.body].forEach(el => {
+      el.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      el.addEventListener('dragleave', e => {
+        if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
+      });
+    });
+
+    dropZone.addEventListener('drop', handleDrop);
+    document.body.addEventListener('drop', handleDrop);
+
+    function handleDrop(e) {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+
+      // 1. Local file drag
+      const files = [...(e.dataTransfer.files || [])];
+      const imgFile = files.find(f => f.type.startsWith('image/'));
+      if (imgFile) { applyBgFile(imgFile); return; }
+
+      // 2. URL drag (e.g. dragging image from Google Images)
+      const uriList = e.dataTransfer.getData('text/uri-list');
+      if (uriList) {
+        const url = uriList.split('\n').map(u => u.trim()).find(u => u && !u.startsWith('#'));
+        if (url) { applyBgUrl(url); return; }
+      }
+
+      // 3. HTML containing an <img src="..."> (fallback)
+      const html = e.dataTransfer.getData('text/html');
+      if (html) {
+        const m = html.match(/src=["']([^"']+)["']/);
+        if (m) { applyBgUrl(m[1]); return; }
+      }
+    }
 
     /* ── Dark / light mode ──────────────────────────────────── */
     const html = document.documentElement;
