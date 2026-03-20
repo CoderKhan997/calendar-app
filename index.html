@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Calendar App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --primary:        #A8C5DA;
+      --primary-dark:   #7BA7BC;
+      --secondary:      #C3B1E1;
+      --secondary-dark: #9D8EC4;
+      --bg:             #F9F6FF;
+      --surface:        #FFFFFF;
+      --surface2:       #EDE9F8;
+      --on-surface:     #1E1B2E;
+      --on-surface-dim: #6B6880;
+      --today-ring:     #A8C5DA;
+      --radius-full:    50%;
+      --radius-card:    20px;
+      --radius-sm:      12px;
+      --shadow:         0 2px 12px rgba(0,0,0,.08);
+      --transition:     .25s ease;
+    }
+    [data-theme="dark"] {
+      --primary:        #7BA7BC;
+      --primary-dark:   #5C8EA3;
+      --secondary:      #9D8EC4;
+      --secondary-dark: #7B6CA8;
+      --bg:             #1E1B2E;
+      --surface:        #2A2640;
+      --surface2:       #332F50;
+      --on-surface:     #EDE9F8;
+      --on-surface-dim: #9D99B8;
+      --today-ring:     #7BA7BC;
+      --shadow:         0 2px 16px rgba(0,0,0,.35);
+    }
+
+    /* ── Reset / Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--on-surface);
+      min-height: 100dvh;
+      transition: background var(--transition), color var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+    }
+
+    /* ── Top bar ────────────────────────────────────────────── */
+    .topbar {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .app-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -.3px;
+    }
+    .icon-btn {
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius-sm);
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      color: var(--on-surface);
+      transition: background var(--transition), transform .1s;
+    }
+    .icon-btn:hover  { background: var(--surface2); }
+    .icon-btn:active { transform: scale(.93); }
+
+    /* ── Card ───────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+      padding: 28px 24px 24px;
+      width: 100%;
+      max-width: 480px;
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+
+    /* ── Month nav ──────────────────────────────────────────── */
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .month-label {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+    }
+
+    /* ── Day-of-week header ─────────────────────────────────── */
+    .dow-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 6px;
+    }
+    .dow-cell {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--on-surface-dim);
+      padding: 4px 0;
+    }
+
+    /* ── Day grid ───────────────────────────────────────────── */
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .day-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .day-btn {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-full);
+      border: none;
+      background: transparent;
+      color: var(--on-surface);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s, transform .1s;
+      position: relative;
+    }
+    .day-btn:hover { background: var(--surface2); }
+    .day-btn:active { transform: scale(.9); }
+
+    .day-btn.today {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .day-btn.selected:not(.today) {
+      background: var(--secondary);
+      color: #fff;
+      font-weight: 600;
+    }
+    .day-btn.has-event::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--secondary);
+    }
+    .day-btn.today.has-event::after { background: #fff; }
+
+    /* ── Event panel ────────────────────────────────────────── */
+    .event-panel {
+      margin-top: 16px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      min-height: 56px;
+      transition: background var(--transition);
+    }
+    .event-panel-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--on-surface-dim);
+      margin-bottom: 10px;
+    }
+    .event-list { display: flex; flex-direction: column; gap: 8px; }
+    .event-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      box-shadow: var(--shadow);
+    }
+    .event-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .event-none {
+      font-size: 13px;
+      color: var(--on-surface-dim);
+      text-align: center;
+      padding: 6px 0;
+    }
+
+    /* ── Add event ──────────────────────────────────────────── */
+    .add-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .add-input {
+      flex: 1;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--on-surface);
+      box-shadow: var(--shadow);
+      outline: none;
+      transition: box-shadow .15s;
+    }
+    .add-input:focus { box-shadow: 0 0 0 2px var(--primary); }
+    .add-input::placeholder { color: var(--on-surface-dim); }
+
+    .fab {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,.18);
+      transition: background .15s, transform .1s;
+      flex-shrink: 0;
+    }
+    .fab:hover  { background: var(--primary-dark); }
+    .fab:active { transform: scale(.92); }
+
+    /* ── Mini strip (month overview) ────────────────────────── */
+    .strip-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--on-surface-dim);
+      margin: 20px 0 8px;
+      width: 100%;
+      max-width: 480px;
+      padding-left: 4px;
+    }
+    .strip {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 480px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .strip::-webkit-scrollbar { display: none; }
+    .strip-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .strip-dow {
+      font-size: 11px;
+      color: var(--on-surface-dim);
+      font-weight: 500;
+    }
+    .strip-num {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+      color: var(--on-surface);
+    }
+    .strip-num:hover    { background: var(--surface2); }
+    .strip-num.s-today  { background: var(--primary); color: #fff; }
+    .strip-num.s-sel    { background: var(--secondary); color: #fff; }
+    .strip-num.s-event::after {
+      content: '';
+      position: absolute;
+      bottom: 2px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--secondary);
+    }
+    .strip-num { position: relative; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="app-title">Calendar</span>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
+      <span class="material-icons-round" id="themeIcon">dark_mode</span>
+    </button>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+    <!-- Month navigation -->
+    <div class="month-nav">
+      <button class="icon-btn" id="prevBtn" aria-label="Previous month">
+        <span class="material-icons-round">chevron_left</span>
+      </button>
+      <span class="month-label" id="monthLabel"></span>
+      <button class="icon-btn" id="nextBtn" aria-label="Next month">
+        <span class="material-icons-round">chevron_right</span>
+      </button>
+    </div>
+
+    <!-- Days of week -->
+    <div class="dow-row" id="dowRow"></div>
+
+    <!-- Day grid -->
+    <div class="day-grid" id="dayGrid"></div>
+
+    <!-- Event panel -->
+    <div class="event-panel">
+      <div class="event-panel-title" id="eventTitle">Events</div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+
+    <!-- Add event -->
+    <div class="add-row">
+      <input class="add-input" id="eventInput" placeholder="Add event…" maxlength="60" />
+      <button class="fab" id="addBtn" aria-label="Add event">
+        <span class="material-icons-round">add</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Strip -->
+  <div class="strip-label" id="stripLabel"></div>
+  <div class="strip" id="strip"></div>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────
+    const today  = new Date();
+    let current  = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selected = new Date(today);
+    const events = {};   // { 'YYYY-MM-DD': [{text, color}] }
+
+    const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const MONTHS = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+    const COLORS = ['#A8C5DA','#C3B1E1','#B5D5C5','#F4A9A8','#F9D8A0','#A8D5E2'];
+
+    // ── Helpers ────────────────────────────────────────────────
+    const key = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const isToday = d => key(d) === key(today);
+    const isSel   = d => key(d) === key(selected);
+
+    // ── Render calendar ────────────────────────────────────────
+    function render() {
+      const year  = current.getFullYear();
+      const month = current.getMonth();
+      const start = new Date(year, month, 1).getDay();
+      const days  = new Date(year, month + 1, 0).getDate();
+
+      document.getElementById('monthLabel').textContent = `${MONTHS[month]} ${year}`;
+
+      // DOW header
+      const dowRow = document.getElementById('dowRow');
+      dowRow.innerHTML = DAYS.map(d => `<div class="dow-cell">${d}</div>`).join('');
+
+      // Day grid
+      const grid = document.getElementById('dayGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < start; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        grid.appendChild(cell);
+      }
+
+      for (let d = 1; d <= days; d++) {
+        const date = new Date(year, month, d);
+        const k    = key(date);
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+
+        const btn = document.createElement('button');
+        btn.className = 'day-btn' +
+          (isToday(date) ? ' today' : '') +
+          (isSel(date) && !isToday(date) ? ' selected' : '') +
+          (events[k]?.length ? ' has-event' : '');
+        btn.textContent = d;
+        btn.addEventListener('click', () => { selected = date; render(); renderEvents(); });
+
+        cell.appendChild(btn);
+        grid.appendChild(cell);
+      }
+
+      renderStrip();
+    }
+
+    // ── Render events panel ────────────────────────────────────
+    function renderEvents() {
+      const k    = key(selected);
+      const list = events[k] || [];
+      const opts = { weekday:'long', month:'long', day:'numeric' };
+      document.getElementById('eventTitle').textContent =
+        selected.toLocaleDateString(undefined, opts);
+
+      const el = document.getElementById('eventList');
+      el.innerHTML = list.length
+        ? list.map(e => `
+            <div class="event-item">
+              <span class="event-dot" style="background:${e.color}"></span>
+              ${e.text}
+            </div>`).join('')
+        : '<div class="event-none">No events — add one below</div>';
+    }
+
+    // ── Add event ──────────────────────────────────────────────
+    document.getElementById('addBtn').addEventListener('click', addEvent);
+    document.getElementById('eventInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addEvent();
+    });
+
+    function addEvent() {
+      const input = document.getElementById('eventInput');
+      const text  = input.value.trim();
+      if (!text) return;
+      const k = key(selected);
+      if (!events[k]) events[k] = [];
+      const color = COLORS[events[k].length % COLORS.length];
+      events[k].push({ text, color });
+      input.value = '';
+      render();
+      renderEvents();
+    }
+
+    // ── Strip ──────────────────────────────────────────────────
+    function renderStrip() {
+      const year  = current.getFullYear();
+      const month = current.getMonth();
+      const days  = new Date(year, month + 1, 0).getDate();
+
+      document.getElementById('stripLabel').textContent =
+        `${MONTHS[month]} at a glance`;
+
+      const strip = document.getElementById('strip');
+      strip.innerHTML = '';
+
+      for (let d = 1; d <= days; d++) {
+        const date = new Date(year, month, d);
+        const k    = key(date);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'strip-day';
+
+        const dow = document.createElement('div');
+        dow.className = 'strip-dow';
+        dow.textContent = DAYS[date.getDay()][0];
+
+        const num = document.createElement('div');
+        num.className = 'strip-num' +
+          (isToday(date) ? ' s-today' : '') +
+          (isSel(date) && !isToday(date) ? ' s-sel' : '') +
+          (events[k]?.length ? ' s-event' : '');
+        num.textContent = d;
+        num.addEventListener('click', () => { selected = date; render(); renderEvents(); });
+
+        wrap.appendChild(dow);
+        wrap.appendChild(num);
+        strip.appendChild(wrap);
+      }
+
+      // scroll selected day into view
+      const idx = selected.getMonth() === month && selected.getFullYear() === year
+        ? selected.getDate() - 1 : 0;
+      const target = strip.children[Math.max(idx - 2, 0)];
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    }
+
+    // ── Month nav ──────────────────────────────────────────────
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+      render(); renderEvents();
+    });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      render(); renderEvents();
+    });
+
+    // ── Dark / light mode ──────────────────────────────────────
+    const html = document.documentElement;
+    const pref = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme(dark) {
+      html.setAttribute('data-theme', dark ? 'dark' : 'light');
+      document.getElementById('themeIcon').textContent = dark ? 'light_mode' : 'dark_mode';
+    }
+
+    applyTheme(pref.matches);
+    pref.addEventListener('change', e => applyTheme(e.matches));
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      applyTheme(html.getAttribute('data-theme') !== 'dark');
+    });
+
+    // ── Init ───────────────────────────────────────────────────
+    render();
+    renderEvents();
+  </script>
+</body>
+</html>
