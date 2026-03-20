@@ -70,6 +70,7 @@
     [data-theme="dark"] body.has-bg::before { background: rgba(30,27,46,0.65); }
 
     body > * { position: relative; z-index: 1; }
+    .topbar   { z-index: 100; }   /* must exceed .card so settings panel clears it */
 
     body.has-bg .card {
       background: rgba(255,255,255,0.76);
@@ -432,6 +433,19 @@
       flex-shrink: 0;
     }
     .event-text { flex: 1; }
+    .event-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--on-surface-dim);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      width: 26px; height: 26px;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+      font-size: 16px;
+    }
+    .event-delete:hover { background: #F4A9A820; color: #C0605F; }
     .event-none {
       font-size: 13px;
       color: var(--on-surface-dim);
@@ -767,13 +781,31 @@
       const list = events[k] || [];
       document.getElementById('eventTitle').textContent =
         selected.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
-      document.getElementById('eventList').innerHTML = list.length
-        ? list.map(e =>
-            `<div class="event-item">
-               <span class="event-dot" style="background:${e.color}"></span>
-               <span class="event-text">${e.text}</span>
-             </div>`).join('')
-        : '<div class="event-none">No events — add one below</div>';
+
+      const el = document.getElementById('eventList');
+      if (!list.length) {
+        el.innerHTML = '<div class="event-none">No events — add one below</div>';
+        return;
+      }
+
+      el.innerHTML = '';
+      list.forEach((e, i) => {
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        item.innerHTML =
+          `<span class="event-dot" style="background:${e.color}"></span>
+           <span class="event-text">${e.text}</span>
+           <button class="event-delete" aria-label="Delete event" title="Delete">
+             <span class="material-icons-round" style="font-size:16px">close</span>
+           </button>`;
+        item.querySelector('.event-delete').addEventListener('click', () => {
+          events[k].splice(i, 1);
+          if (!events[k].length) delete events[k];
+          render();
+          renderEvents();
+        });
+        el.appendChild(item);
+      });
     }
 
     /* ── Add event ──────────────────────────────────────────── */
