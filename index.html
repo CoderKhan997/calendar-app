@@ -48,12 +48,10 @@
       background-color: var(--bg);
       color: var(--on-surface);
       min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: 24px 16px 48px;
-      background-size: cover;
-      background-position: center;
+      background-size: auto;
+      background-repeat: repeat;
       background-attachment: fixed;
       transition: background-color var(--transition), color var(--transition);
       overflow-y: scroll;
@@ -64,25 +62,25 @@
       content: ''; position: fixed; inset: 0; z-index: 0;
       pointer-events: none; transition: background var(--transition);
     }
-    body.has-bg::before                    { background: rgba(249,246,255,.55); }
-    [data-theme="dark"] body.has-bg::before{ background: rgba(30,27,46,.65);    }
+    body.has-bg::before                     { background: rgba(249,246,255,.5); }
+    [data-theme="dark"] body.has-bg::before { background: rgba(30,27,46,.6);    }
 
     body > * { position: relative; z-index: 1; }
     .topbar   { z-index: 200; }
 
     body.has-bg .card {
-      background: rgba(255,255,255,.76);
+      background: rgba(255,255,255,.78);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     [data-theme="dark"] body.has-bg .card {
-      background: rgba(42,38,64,.76);
+      background: rgba(42,38,64,.78);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     body.has-bg .settings-panel {
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.92);
     }
-    [data-theme="dark"] body.has-bg .settings-panel { background: rgba(42,38,64,.9); }
+    [data-theme="dark"] body.has-bg .settings-panel { background: rgba(42,38,64,.92); }
 
     /* ── Top bar ─────────────────────────────────────────────── */
     .topbar {
@@ -91,21 +89,17 @@
       margin-bottom: 20px;
     }
     .app-title {
-      font-size: 22px; font-weight: 600;
-      color: var(--primary); letter-spacing: -.3px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 22px; font-weight: 600; color: var(--primary);
+      letter-spacing: -.3px; display: flex; align-items: center; gap: 6px;
     }
     .top-actions { display: flex; gap: 10px; align-items: center; }
 
     /* ── Icon button ─────────────────────────────────────────── */
     .icon-btn {
-      background: var(--surface); border: none;
-      border-radius: var(--radius-sm);
-      width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; box-shadow: var(--shadow);
-      color: var(--on-surface); flex-shrink: 0;
-      transition: background var(--transition), transform .1s;
+      background: var(--surface); border: none; border-radius: var(--radius-sm);
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: var(--shadow); color: var(--on-surface);
+      flex-shrink: 0; transition: background var(--transition), transform .1s;
     }
     .icon-btn:hover  { background: var(--surface2); }
     .icon-btn:active { transform: scale(.93); }
@@ -114,24 +108,30 @@
     .settings-wrap { position: relative; }
 
     .settings-panel {
-      position: absolute; top: calc(100% + 12px); right: 0;
-      width: 300px; background: var(--surface);
-      border-radius: 20px; box-shadow: 0 8px 36px rgba(0,0,0,.18);
-      padding: 20px; z-index: 500;
-      opacity: 0; transform: translateY(-10px) scale(.95);
+      position: absolute; top: calc(100% + 12px); right: 0; width: 308px;
+      background: var(--surface); border-radius: 20px;
+      box-shadow: 0 8px 36px rgba(0,0,0,.18); padding: 20px;
+      z-index: 500; opacity: 0; transform: translateY(-10px) scale(.95);
       pointer-events: none; transform-origin: top right;
-      transition: opacity .22s cubic-bezier(.4,0,.2,1),
-                  transform .22s cubic-bezier(.4,0,.2,1);
-      max-height: 85vh; overflow-y: auto; scrollbar-width: thin;
+      transition: opacity .22s cubic-bezier(.4,0,.2,1), transform .22s cubic-bezier(.4,0,.2,1);
+      max-height: 88vh; overflow-y: auto;
+      /* ── Themed scrollbar ── */
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) var(--surface2);
     }
+    .settings-panel::-webkit-scrollbar       { width: 5px; }
+    .settings-panel::-webkit-scrollbar-track { background: var(--surface2); border-radius: 10px; margin: 6px 0; }
+    .settings-panel::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+    .settings-panel::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
     .settings-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 
     .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .settings-title  { font-size: 15px; font-weight: 600; }
     .settings-close  {
-      background: none; border: none; cursor: pointer;
-      color: var(--on-surface-dim); width: 28px; height: 28px;
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; color: var(--on-surface-dim);
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
       transition: background .15s, color .15s;
     }
     .settings-close:hover { background: var(--surface2); color: var(--on-surface); }
@@ -142,15 +142,17 @@
       font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
       text-transform: uppercase; color: var(--on-surface-dim); margin-bottom: 10px;
     }
+    .section-sublabel {
+      font-size: 11px; font-weight: 500; color: var(--on-surface-dim); margin-bottom: 8px;
+    }
     .settings-divider { border: none; border-top: 1px solid var(--surface2); margin: 16px 0; }
 
     /* ── Font options ─────────────────────────────────────────── */
     .font-options { display: flex; flex-direction: column; gap: 5px; }
     .font-btn {
-      background: transparent; border: 1.5px solid var(--surface2);
-      border-radius: 10px; padding: 9px 13px; cursor: pointer;
-      text-align: left; font-size: 13.5px; color: var(--on-surface);
-      display: flex; align-items: center; justify-content: space-between;
+      background: transparent; border: 1.5px solid var(--surface2); border-radius: 10px;
+      padding: 9px 13px; cursor: pointer; text-align: left; font-size: 13.5px;
+      color: var(--on-surface); display: flex; align-items: center; justify-content: space-between;
       transition: border-color .15s, background .15s;
     }
     .font-btn:hover  { border-color: var(--primary); background: var(--surface2); }
@@ -163,9 +165,8 @@
     .color-wheel-wrap {
       width: 46px; height: 46px; border-radius: 50%;
       background: conic-gradient(
-        hsl(0,85%,65%) 0deg, hsl(30,85%,65%) 40deg,
-        hsl(60,85%,65%) 80deg, hsl(120,75%,60%) 130deg,
-        hsl(180,75%,55%) 180deg, hsl(210,75%,60%) 210deg,
+        hsl(0,85%,65%) 0deg, hsl(30,85%,65%) 40deg, hsl(60,85%,65%) 80deg,
+        hsl(120,75%,60%) 130deg, hsl(180,75%,55%) 180deg, hsl(210,75%,60%) 210deg,
         hsl(240,75%,65%) 240deg, hsl(280,75%,65%) 280deg,
         hsl(320,80%,65%) 320deg, hsl(360,85%,65%) 360deg
       );
@@ -184,15 +185,38 @@
     }
     .color-hint { font-size: 12px; color: var(--on-surface-dim); line-height: 1.3; }
 
-    /* ── Background upload ────────────────────────────────────── */
-    .bg-controls { display: flex; gap: 8px; align-items: stretch; }
+    /* ── Background section ───────────────────────────────────── */
 
+    /* Solid colour swatches */
+    .bg-color-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 4px; }
+    .bg-color-swatch {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2.5px solid transparent; cursor: pointer;
+      box-shadow: 0 1px 5px rgba(0,0,0,.13);
+      transition: transform .15s, border-color .15s, box-shadow .15s;
+    }
+    .bg-color-swatch:hover        { transform: scale(1.14); }
+    .bg-color-swatch.bg-active    { border-color: var(--on-surface); box-shadow: 0 0 0 1px var(--on-surface); }
+
+    /* Wallpaper thumbnails */
+    .wallpaper-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
+    .wallpaper-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .wallpaper-thumb {
+      width: 100%; aspect-ratio: 1; border-radius: 10px; cursor: pointer;
+      border: 2px solid var(--surface2); background-repeat: repeat; background-size: auto;
+      transition: transform .15s, border-color .15s;
+    }
+    .wallpaper-thumb:hover      { transform: scale(1.06); border-color: var(--primary); }
+    .wallpaper-thumb.bg-active  { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .wallpaper-label { font-size: 9.5px; color: var(--on-surface-dim); text-align: center; }
+
+    /* Custom upload row */
+    .bg-upload-row { display: flex; gap: 8px; align-items: stretch; }
     .bg-upload-label {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 4px; background: var(--surface2);
-      border: none; border-radius: 10px; padding: 10px 13px;
-      font-size: 11.5px; color: var(--on-surface); cursor: pointer;
-      text-align: center; flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; background: var(--surface2); border: none; border-radius: 10px;
+      padding: 10px 12px; font-size: 11.5px; color: var(--on-surface);
+      cursor: pointer; text-align: center; flex: 1;
       transition: background .15s, color .15s;
     }
     .bg-upload-label:hover { background: var(--primary); color: #fff; }
@@ -202,8 +226,7 @@
       flex: 1; border: 2px dashed var(--surface2); border-radius: 10px;
       padding: 10px 8px; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 4px;
-      font-size: 11.5px; color: var(--on-surface-dim);
-      text-align: center; cursor: default;
+      font-size: 11.5px; color: var(--on-surface-dim); text-align: center; cursor: default;
       transition: border-color .15s, background .15s, color .15s;
     }
     .drop-zone.drag-over {
@@ -213,35 +236,34 @@
 
     #removeBgBtn {
       display: flex; align-items: center; justify-content: center; gap: 5px;
-      background: transparent; border: 1.5px solid var(--surface2);
-      border-radius: 10px; padding: 8px 11px; font-size: 13px;
-      color: var(--on-surface-dim); cursor: pointer; width: 100%; margin-top: 8px;
-      opacity: .4; pointer-events: none;
+      background: transparent; border: 1.5px solid var(--surface2); border-radius: 10px;
+      padding: 8px 11px; font-size: 13px; color: var(--on-surface-dim);
+      cursor: pointer; width: 100%; margin-top: 10px;
+      opacity: .38; pointer-events: none;
       transition: border-color .15s, color .15s, opacity .2s;
     }
     #removeBgBtn.active { opacity: 1; pointer-events: all; }
     #removeBgBtn.active:hover { border-color: #F4A9A8; color: #C0605F; }
 
     /* ── Michroma optimisations ──────────────────────────────── */
-    body.font-michroma .app-title         { font-size: 17px; letter-spacing: -.04em; }
+    body.font-michroma .app-title          { font-size: 17px; letter-spacing: -.04em; }
     body.font-michroma .month-label-btn,
-    body.font-michroma .year-label-btn    { font-size: 14px; letter-spacing: -.04em; }
-    body.font-michroma .dow-cell          { font-size: 10px; letter-spacing: -.03em; }
-    body.font-michroma .day-btn           { font-size: 11.5px; letter-spacing: -.02em; }
-    body.font-michroma .event-panel-title { font-size: 11px;   letter-spacing: -.02em; }
-    body.font-michroma .event-item        { font-size: 12px;   letter-spacing: -.02em; }
-    body.font-michroma .add-input         { font-size: 12px;   letter-spacing: -.01em; }
-    body.font-michroma .strip-label       { font-size: 10px;   letter-spacing: -.03em; }
-    body.font-michroma .strip-dow         { font-size: 9px;    letter-spacing:  0;     }
-    body.font-michroma .strip-num         { font-size: 10.5px; letter-spacing: -.02em; }
+    body.font-michroma .year-label-btn     { font-size: 14px; letter-spacing: -.04em; }
+    body.font-michroma .dow-cell           { font-size: 10px; letter-spacing: -.03em; }
+    body.font-michroma .day-btn            { font-size: 11.5px; letter-spacing: -.02em; }
+    body.font-michroma .event-panel-title  { font-size: 11px;   letter-spacing: -.02em; }
+    body.font-michroma .event-item         { font-size: 12px;   letter-spacing: -.02em; }
+    body.font-michroma .add-input          { font-size: 12px;   letter-spacing: -.01em; }
+    body.font-michroma .strip-label        { font-size: 10px;   letter-spacing: -.03em; }
+    body.font-michroma .strip-dow          { font-size: 9px;    letter-spacing:  0;     }
+    body.font-michroma .strip-num          { font-size: 10.5px; letter-spacing: -.02em; }
 
     /* ── Card ────────────────────────────────────────────────── */
     .card {
       background: var(--surface); border-radius: var(--radius-card);
       box-shadow: var(--shadow); padding: 28px 24px 24px;
-      width: 100%; max-width: 480px;
+      width: 100%; max-width: 480px; overflow: visible;
       transition: background var(--transition), box-shadow var(--transition);
-      overflow: visible;
     }
 
     /* ── Month nav ───────────────────────────────────────────── */
@@ -249,37 +271,30 @@
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 20px; position: relative; z-index: 50;
     }
-    .month-label-wrap {
-      display: flex; align-items: center; gap: 2px;
-      position: relative;
-    }
+    .month-label-wrap { display: flex; align-items: center; gap: 2px; position: relative; }
     .month-label-btn, .year-label-btn {
-      background: none; border: none; cursor: pointer;
-      font-size: 18px; font-weight: 600; letter-spacing: -.2px;
-      color: var(--on-surface); padding: 5px 8px; border-radius: 10px;
-      transition: background .15s;
+      background: none; border: none; cursor: pointer; font-size: 18px;
+      font-weight: 600; letter-spacing: -.2px; color: var(--on-surface);
+      padding: 5px 8px; border-radius: 10px; transition: background .15s;
     }
     .month-label-btn:hover, .year-label-btn:hover { background: var(--surface2); }
     .month-label-btn:focus, .year-label-btn:focus { outline: none; }
 
-    /* ── Picker popups (month & year) ────────────────────────── */
+    /* ── Picker popups ───────────────────────────────────────── */
     .picker-popup {
       position: absolute; top: calc(100% + 10px); left: 50%;
       transform: translateX(-50%) translateY(-8px) scale(.95);
       background: var(--surface); border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.16);
-      padding: 16px; z-index: 300; min-width: 260px;
-      opacity: 0; pointer-events: none; transform-origin: top center;
-      transition: opacity .2s cubic-bezier(.4,0,.2,1),
-                  transform .2s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 8px 32px rgba(0,0,0,.16); padding: 16px;
+      z-index: 300; min-width: 260px; opacity: 0; pointer-events: none;
+      transform-origin: top center;
+      transition: opacity .2s cubic-bezier(.4,0,.2,1), transform .2s cubic-bezier(.4,0,.2,1);
     }
     .picker-popup.open {
       opacity: 1; pointer-events: all;
       transform: translateX(-50%) translateY(0) scale(1);
     }
-    .picker-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
-    }
+    .picker-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
     .picker-cell {
       padding: 9px 4px; border: none; border-radius: 10px;
       background: var(--surface2); color: var(--on-surface);
@@ -289,55 +304,41 @@
     .picker-cell:hover  { background: var(--primary); color: #fff; }
     .picker-cell.active { background: var(--primary); color: #fff; }
 
-    .year-popup-nav {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px;
-    }
+    .year-popup-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .year-nav-btn {
       background: var(--surface2); border: none; border-radius: 8px;
       width: 30px; height: 30px; cursor: pointer; color: var(--on-surface);
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
     }
     .year-nav-btn:hover { background: var(--primary); color: #fff; }
     .year-range-label { font-size: 13px; font-weight: 600; color: var(--on-surface-dim); }
 
     /* ── DOW header ──────────────────────────────────────────── */
-    .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 6px; }
-    .dow-cell {
-      text-align: center; font-size: 12px; font-weight: 500;
-      color: var(--on-surface-dim); padding: 4px 0;
-    }
+    .dow-row { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 6px; }
+    .dow-cell { text-align: center; font-size: 12px; font-weight: 500; color: var(--on-surface-dim); padding: 4px 0; }
 
     /* ── Day grid ────────────────────────────────────────────── */
-    .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
     .day-cell  { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-
     .day-btn {
       width: 36px; height: 36px; border-radius: 50%; border: none;
-      background: transparent; color: var(--on-surface);
-      font-size: 14px; font-weight: 400; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s, color .15s, transform .1s;
-      position: relative; -webkit-tap-highlight-color: transparent;
+      background: transparent; color: var(--on-surface); font-size: 14px; font-weight: 400;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s, transform .1s; position: relative;
+      -webkit-tap-highlight-color: transparent;
     }
     .day-btn:hover  { background: var(--surface2); }
     .day-btn:active { transform: scale(.88); }
     .day-btn:focus  { outline: none; }
     .day-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
     .day-btn.today    { background: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
     .day-btn.selected:not(.today) { background: var(--secondary); color: #fff; font-weight: 600; }
-
-    /* Event dot (bottom) */
     .day-btn.has-event::after {
       content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
       width: 4px; height: 4px; border-radius: 50%; background: var(--secondary);
     }
     .day-btn.today.has-event::after,
     .day-btn.selected.has-event::after { background: rgba(255,255,255,.75); }
-
-    /* Holiday dot (top) */
     .day-btn.holiday::before {
       content: ''; position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
       width: 4px; height: 4px; border-radius: 50%; background: var(--holiday);
@@ -347,21 +348,18 @@
 
     /* ── Event panel ─────────────────────────────────────────── */
     .event-panel {
-      margin-top: 16px; background: var(--surface2);
-      border-radius: var(--radius-sm); padding: 14px 16px; min-height: 54px;
-      transition: background var(--transition);
+      margin-top: 16px; background: var(--surface2); border-radius: var(--radius-sm);
+      padding: 14px 16px; min-height: 54px; transition: background var(--transition);
     }
-    .event-panel-title {
-      font-size: 12.5px; font-weight: 500; color: var(--on-surface-dim); margin-bottom: 10px;
-    }
+    .event-panel-title { font-size: 12.5px; font-weight: 500; color: var(--on-surface-dim); margin-bottom: 10px; }
     .event-list { display: flex; flex-direction: column; gap: 7px; }
     .event-item {
       display: flex; align-items: center; gap: 10px;
       background: var(--surface); border-radius: 10px;
       padding: 9px 13px; font-size: 13.5px; box-shadow: var(--shadow);
     }
-    .event-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .event-text { flex: 1; }
+    .event-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .event-text  { flex: 1; }
     .event-delete {
       background: none; border: none; cursor: pointer; color: var(--on-surface-dim);
       display: flex; align-items: center; justify-content: center;
@@ -380,7 +378,6 @@
 
     /* ── Add row ─────────────────────────────────────────────── */
     .add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
-
     .event-color-pick { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
     .event-color-swatch {
       position: absolute; inset: 0; border-radius: 50%;
@@ -393,10 +390,9 @@
       opacity: 0; cursor: pointer; border: none; padding: 0; border-radius: 50%;
     }
     .add-input {
-      flex: 1; border: none; border-radius: var(--radius-sm);
-      padding: 10px 14px; font-size: 14px; background: var(--surface);
-      color: var(--on-surface); box-shadow: var(--shadow); outline: none;
-      transition: box-shadow .15s;
+      flex: 1; border: none; border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 14px; background: var(--surface); color: var(--on-surface);
+      box-shadow: var(--shadow); outline: none; transition: box-shadow .15s;
     }
     .add-input:focus { box-shadow: 0 0 0 2px var(--primary); }
     .add-input::placeholder { color: var(--on-surface-dim); }
@@ -417,19 +413,17 @@
     }
     .strip {
       display: flex; gap: 4px; width: 100%; max-width: 480px;
-      overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;
-      align-items: flex-end;
+      overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; align-items: flex-end;
     }
     .strip::-webkit-scrollbar { display: none; }
-
     .strip-day  { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
     .strip-dow  { font-size: 11px; color: var(--on-surface-dim); font-weight: 500; }
     .strip-num  {
       width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; font-weight: 500; cursor: pointer;
-      color: var(--on-surface); position: relative;
-      transition: background .15s; -webkit-tap-highlight-color: transparent;
+      color: var(--on-surface); position: relative; transition: background .15s;
+      -webkit-tap-highlight-color: transparent;
     }
     .strip-num:hover               { background: var(--surface2); }
     .strip-num.s-today             { background: var(--primary); color: #fff; }
@@ -438,23 +432,15 @@
       content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
       width: 4px; height: 4px; border-radius: 50%; background: var(--secondary);
     }
-    .strip-num.s-today.s-event::after,
-    .strip-num.s-sel.s-event::after { background: rgba(255,255,255,.75); }
+    .strip-num.s-today.s-event::after, .strip-num.s-sel.s-event::after { background: rgba(255,255,255,.75); }
     .strip-num.s-holiday::before {
       content: ''; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
       width: 4px; height: 4px; border-radius: 50%; background: var(--holiday);
     }
-    .strip-num.s-today.s-holiday::before,
-    .strip-num.s-sel.s-holiday::before { background: rgba(255,255,255,.85); }
-
-    /* Week separator in strip */
+    .strip-num.s-today.s-holiday::before, .strip-num.s-sel.s-holiday::before { background: rgba(255,255,255,.85); }
     .strip-week-sep {
-      width: 1.5px;
-      align-self: stretch;
-      background: var(--surface2);
-      border-radius: 2px;
-      flex-shrink: 0;
-      margin: 0 3px;
+      width: 1.5px; align-self: stretch; background: var(--surface2);
+      border-radius: 2px; flex-shrink: 0; margin: 0 3px;
     }
   </style>
 </head>
@@ -467,8 +453,6 @@
       Calendar
     </span>
     <div class="top-actions">
-
-      <!-- Settings cog -->
       <div class="settings-wrap">
         <button class="icon-btn" id="settingsBtn" aria-label="Settings">
           <span class="material-icons-round">settings</span>
@@ -486,21 +470,11 @@
           <div class="settings-section">
             <div class="section-label">Font</div>
             <div class="font-options" id="fontOptions">
-              <button class="font-btn active" data-font="'Google Sans','Roboto',sans-serif" style="font-family:'Google Sans','Roboto',sans-serif">
-                Google Sans <span class="material-icons-round check">check</span>
-              </button>
-              <button class="font-btn" data-font="'Michroma',sans-serif" style="font-family:'Michroma',sans-serif">
-                Michroma <span class="material-icons-round check">check</span>
-              </button>
-              <button class="font-btn" data-font="'Calibri','Gill Sans',sans-serif" style="font-family:'Calibri','Gill Sans',sans-serif">
-                Calibri <span class="material-icons-round check">check</span>
-              </button>
-              <button class="font-btn" data-font="'Cambria','Georgia',serif" style="font-family:'Cambria','Georgia',serif">
-                Cambria <span class="material-icons-round check">check</span>
-              </button>
-              <button class="font-btn" data-font="'Segoe Script','Brush Script MT',cursive" style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15px">
-                Segoe Script <span class="material-icons-round check">check</span>
-              </button>
+              <button class="font-btn active" data-font="'Google Sans','Roboto',sans-serif" style="font-family:'Google Sans','Roboto',sans-serif">Google Sans <span class="material-icons-round check">check</span></button>
+              <button class="font-btn" data-font="'Michroma',sans-serif" style="font-family:'Michroma',sans-serif">Michroma <span class="material-icons-round check">check</span></button>
+              <button class="font-btn" data-font="'Calibri','Gill Sans',sans-serif" style="font-family:'Calibri','Gill Sans',sans-serif">Calibri <span class="material-icons-round check">check</span></button>
+              <button class="font-btn" data-font="'Cambria','Georgia',serif" style="font-family:'Cambria','Georgia',serif">Cambria <span class="material-icons-round check">check</span></button>
+              <button class="font-btn" data-font="'Segoe Script','Brush Script MT',cursive" style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15px">Segoe Script <span class="material-icons-round check">check</span></button>
             </div>
           </div>
 
@@ -521,10 +495,18 @@
 
           <hr class="settings-divider" />
 
-          <!-- Background image -->
+          <!-- Background -->
           <div class="settings-section">
-            <div class="section-label">Background Image</div>
-            <div class="bg-controls">
+            <div class="section-label">Background</div>
+
+            <div class="section-sublabel">Solid Colours</div>
+            <div class="bg-color-row" id="bgColorRow"></div>
+
+            <div class="section-sublabel" style="margin-top:14px">Wallpapers</div>
+            <div class="wallpaper-grid" id="wallpaperGrid"></div>
+
+            <div class="section-sublabel" style="margin-top:14px">Custom Photo</div>
+            <div class="bg-upload-row">
               <label class="bg-upload-label">
                 <span class="material-icons-round" style="font-size:20px">add_photo_alternate</span>
                 Choose image
@@ -535,6 +517,7 @@
                 Drop photo here
               </div>
             </div>
+
             <button id="removeBgBtn">
               <span class="material-icons-round" style="font-size:16px">hide_image</span>
               Remove background
@@ -543,7 +526,6 @@
         </div>
       </div>
 
-      <!-- Theme toggle -->
       <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
         <span class="material-icons-round" id="themeIcon">dark_mode</span>
       </button>
@@ -556,18 +538,12 @@
       <button class="icon-btn" id="prevBtn" aria-label="Previous month">
         <span class="material-icons-round">chevron_left</span>
       </button>
-
-      <!-- Clickable month + year labels with pickers -->
       <div class="month-label-wrap" id="monthLabelWrap">
-        <button class="month-label-btn" id="monthPick" aria-label="Pick month"></button>
-        <button class="year-label-btn"  id="yearPick"  aria-label="Pick year"></button>
-
-        <!-- Month picker popup -->
+        <button class="month-label-btn" id="monthPick"></button>
+        <button class="year-label-btn"  id="yearPick"></button>
         <div class="picker-popup" id="monthPopup">
           <div class="picker-grid" id="monthGrid"></div>
         </div>
-
-        <!-- Year picker popup -->
         <div class="picker-popup" id="yearPopup">
           <div class="year-popup-nav">
             <button class="year-nav-btn" id="yearRangePrev">
@@ -581,7 +557,6 @@
           <div class="picker-grid" id="yearGrid"></div>
         </div>
       </div>
-
       <button class="icon-btn" id="nextBtn" aria-label="Next month">
         <span class="material-icons-round">chevron_right</span>
       </button>
@@ -607,403 +582,228 @@
     </div>
   </div>
 
-  <!-- ── Strip ── -->
   <div class="strip-label" id="stripLabel"></div>
-  <div class="strip" id="strip"></div>
+  <div class="strip"       id="strip"></div>
 
   <script>
-    /* ── Constants ──────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════
+       CONSTANTS & STATE
+    ══════════════════════════════════════════════════════════════ */
     const TODAY  = new Date();
     const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const MONTHS = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
     const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    /* ── State ──────────────────────────────────────────────── */
     let current  = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
     let selected = new Date(TODAY);
     const events = {};
 
-    /* ── Helpers ────────────────────────────────────────────── */
-    const p2      = n  => String(n).padStart(2, '0');
-    const key     = d  => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
-    const isToday = d  => key(d) === key(TODAY);
-    const isSel   = d  => key(d) === key(selected);
+    /* ═══════════════════════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════════════════════════ */
+    const p2      = n => String(n).padStart(2,'0');
+    const key     = d => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    const isToday = d => key(d) === key(TODAY);
+    const isSel   = d => key(d) === key(selected);
 
     function darken(hex, amt) {
-      const n = parseInt(hex.replace('#',''), 16);
-      const r = Math.round(((n>>16)&0xff)*(1-amt));
-      const g = Math.round(((n>>8 )&0xff)*(1-amt));
-      const b = Math.round(( n     &0xff)*(1-amt));
+      const n=parseInt(hex.replace('#',''),16);
+      const r=Math.round(((n>>16)&0xff)*(1-amt));
+      const g=Math.round(((n>>8 )&0xff)*(1-amt));
+      const b=Math.round(( n     &0xff)*(1-amt));
       return `#${p2(r.toString(16))}${p2(g.toString(16))}${p2(b.toString(16))}`;
     }
 
-    /* ── Holidays ───────────────────────────────────────────── */
-    const holidayCache = {};
+    const svgUrl = svg =>
+      `url("data:image/svg+xml,${encodeURIComponent(svg.trim())}")`;
 
-    function calcEaster(yr) {
-      const a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4;
-      const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
-      const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
-      const l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
-      const month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
-      return new Date(yr, month-1, day);
-    }
+    /* ═══════════════════════════════════════════════════════════
+       BACKGROUND PRESETS
+    ══════════════════════════════════════════════════════════════ */
+    const BG_COLORS = [
+      { color:'#F0EBFF', label:'Lavender' },
+      { color:'#E5F5ED', label:'Mint'     },
+      { color:'#FFF0E5', label:'Peach'    },
+      { color:'#E5F2FF', label:'Sky'      },
+      { color:'#FFE5F0', label:'Rose'     },
+      { color:'#FFFDE5', label:'Butter'   },
+    ];
 
-    function nthWeekday(yr, mo, wd, n) {
-      // n>0 = nth from start, n<0 = nth from end
-      if (n > 0) {
-        const first = new Date(yr, mo-1, 1).getDay();
-        return 1 + ((wd-first+7)%7) + (n-1)*7;
-      } else {
-        const last = new Date(yr, mo, 0);
-        return last.getDate() - ((last.getDay()-wd+7)%7);
-      }
-    }
+    /* ── SVG Wallpaper patterns ─────────────────────────────── */
+    const WALLPAPERS = [
+      /* 1 — Cats */
+      {
+        name: 'Cats',
+        bgColor: '#FFF5F8',
+        size: '48px 52px',
+        pattern: svgUrl(`
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="52" viewBox="0 0 48 52">
+  <rect width="48" height="52" fill="#FFF5F8"/>
+  <!-- head -->
+  <circle cx="24" cy="34" r="10" fill="none" stroke="#D48AA0" stroke-width="1.3"/>
+  <!-- left ear -->
+  <path d="M15 26 L12 15 L19 23 Z" fill="#D48AA0"/>
+  <!-- right ear -->
+  <path d="M33 26 L36 15 L29 23 Z" fill="#D48AA0"/>
+  <!-- inner left ear -->
+  <path d="M15 25 L13 18 L18 23 Z" fill="#F2B8CA"/>
+  <!-- inner right ear -->
+  <path d="M33 25 L35 18 L30 23 Z" fill="#F2B8CA"/>
+  <!-- eyes -->
+  <ellipse cx="20" cy="33" rx="1.6" ry="1.8" fill="#D48AA0"/>
+  <ellipse cx="28" cy="33" rx="1.6" ry="1.8" fill="#D48AA0"/>
+  <!-- nose -->
+  <path d="M23 36.5 L24 38 L25 36.5 Z" fill="#D48AA0"/>
+  <!-- mouth -->
+  <path d="M24 38 Q22 39.5 21 39" fill="none" stroke="#D48AA0" stroke-width="0.8" stroke-linecap="round"/>
+  <path d="M24 38 Q26 39.5 27 39" fill="none" stroke="#D48AA0" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- whiskers left -->
+  <line x1="8"  y1="35" x2="19" y2="36" stroke="#D48AA0" stroke-width="0.75" stroke-linecap="round"/>
+  <line x1="8"  y1="37.5" x2="19" y2="37.5" stroke="#D48AA0" stroke-width="0.75" stroke-linecap="round"/>
+  <!-- whiskers right -->
+  <line x1="40" y1="35" x2="29" y2="36" stroke="#D48AA0" stroke-width="0.75" stroke-linecap="round"/>
+  <line x1="40" y1="37.5" x2="29" y2="37.5" stroke="#D48AA0" stroke-width="0.75" stroke-linecap="round"/>
+</svg>`)
+      },
 
-    function getHolidays(yr) {
-      if (holidayCache[yr]) return holidayCache[yr];
-      const h = {};
-      const add = (mo, d, name) => {
-        const k = `${yr}-${p2(mo)}-${p2(d)}`;
-        (h[k] = h[k] || []).push(name);
-      };
+      /* 2 — Cars */
+      {
+        name: 'Cars',
+        bgColor: '#F0F6FF',
+        size: '60px 38px',
+        pattern: svgUrl(`
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="38" viewBox="0 0 60 38">
+  <rect width="60" height="38" fill="#F0F6FF"/>
+  <!-- body -->
+  <rect x="3" y="16" width="54" height="13" rx="3.5" fill="none" stroke="#7BAFC8" stroke-width="1.3"/>
+  <!-- roof / cabin -->
+  <path d="M16 16 L20 7 L40 7 L44 16" fill="none" stroke="#7BAFC8" stroke-width="1.3" stroke-linejoin="round"/>
+  <!-- windshield -->
+  <path d="M21 15 L24 8 L36 8 L39 15 Z" fill="none" stroke="#7BAFC8" stroke-width="0.9" stroke-linejoin="round"/>
+  <!-- headlight -->
+  <rect x="54" y="19" width="3" height="5" rx="1" fill="#7BAFC8"/>
+  <!-- tail light -->
+  <rect x="3" y="19" width="3" height="5" rx="1" fill="#7BAFC8"/>
+  <!-- front wheel -->
+  <circle cx="44" cy="29" r="6.5" fill="none" stroke="#7BAFC8" stroke-width="1.3"/>
+  <circle cx="44" cy="29" r="2"   fill="#7BAFC8"/>
+  <!-- rear wheel -->
+  <circle cx="16" cy="29" r="6.5" fill="none" stroke="#7BAFC8" stroke-width="1.3"/>
+  <circle cx="16" cy="29" r="2"   fill="#7BAFC8"/>
+</svg>`)
+      },
 
-      // Fixed-date
-      add(1,  1,  "New Year's Day");
-      add(2,  14, "Valentine's Day");
-      add(7,  1,  "Canada Day");
-      add(7,  4,  "Independence Day");
-      add(10, 31, "Halloween");
-      add(11, 11, "Remembrance / Veterans Day");
-      add(12, 24, "Christmas Eve");
-      add(12, 25, "Christmas Day");
-      add(12, 26, "Boxing Day");
-      add(12, 31, "New Year's Eve");
+      /* 3 — Hearts & Arrows */
+      {
+        name: 'Hearts',
+        bgColor: '#FFF0F4',
+        size: '48px 48px',
+        pattern: svgUrl(`
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <rect width="48" height="48" fill="#FFF0F4"/>
+  <!-- heart -->
+  <path d="M24 38 C24 38 5 26 5 15 C5 9 10 6 14.5 6 C18 6 21.5 8.5 24 12 C26.5 8.5 30 6 33.5 6 C38 6 43 9 43 15 C43 26 24 38 24 38 Z"
+        fill="none" stroke="#D47090" stroke-width="1.4"/>
+  <!-- arrow shaft -->
+  <line x1="5" y1="24" x2="43" y2="24" stroke="#D47090" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- arrowhead right -->
+  <path d="M38 20 L44 24 L38 28" fill="none" stroke="#D47090" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- arrow tail feathers -->
+  <path d="M8 20 L4 24 L8 28"  fill="none" stroke="#D47090" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>`)
+      },
 
-      // Calculated — US & Canada
-      add(1, nthWeekday(yr,1,1,3), "Martin Luther King Jr. Day");
-      add(2, nthWeekday(yr,2,1,3), "Presidents' Day / Family Day");
-      add(5, nthWeekday(yr,5,1,-1), "Memorial Day");
-      add(9, nthWeekday(yr,9,1,1),  "Labour Day");
-      add(10, nthWeekday(yr,10,1,2), "Thanksgiving (CA) · Columbus Day");
-      add(11, nthWeekday(yr,11,4,4), "Thanksgiving (US)");
+      /* 4 — Maple Leaves */
+      {
+        name: 'Maple',
+        bgColor: '#FFF6EE',
+        size: '52px 58px',
+        pattern: svgUrl(`
+<svg xmlns="http://www.w3.org/2000/svg" width="52" height="58" viewBox="0 0 52 58">
+  <rect width="52" height="58" fill="#FFF6EE"/>
+  <!-- maple leaf -->
+  <path d="M26 4
+    L28.5 13 L34 9 L31 18 L40 16 L34 23 L39 27
+    L31 26 L29 38 L26 34 L23 38 L21 26
+    L13 27 L18 23 L12 16 L21 18 L18 9 L23.5 13 Z"
+    fill="none" stroke="#C87035" stroke-width="1.3" stroke-linejoin="round"/>
+  <!-- stem -->
+  <line x1="26" y1="34" x2="26" y2="46" stroke="#C87035" stroke-width="1.3" stroke-linecap="round"/>
+  <!-- small vein lines -->
+  <line x1="26" y1="22" x2="20" y2="18" stroke="#C87035" stroke-width="0.6" stroke-linecap="round"/>
+  <line x1="26" y1="22" x2="32" y2="18" stroke="#C87035" stroke-width="0.6" stroke-linecap="round"/>
+  <line x1="26" y1="28" x2="19" y2="26" stroke="#C87035" stroke-width="0.6" stroke-linecap="round"/>
+  <line x1="26" y1="28" x2="33" y2="26" stroke="#C87035" stroke-width="0.6" stroke-linecap="round"/>
+</svg>`)
+      },
 
-      // Victoria Day — last Monday on or before May 24
-      const vic = new Date(yr,4,24);
-      while (vic.getDay() !== 1) vic.setDate(vic.getDate()-1);
-      add(5, vic.getDate(), "Victoria Day");
+      /* 5 — Plus & Minus */
+      {
+        name: '+ −',
+        bgColor: '#F5F0FF',
+        size: '48px 48px',
+        pattern: svgUrl(`
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <rect width="48" height="48" fill="#F5F0FF"/>
+  <!-- top-left: plus -->
+  <line x1="12" y1="7"  x2="12" y2="17" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="7"  y1="12" x2="17" y2="12" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- top-right: minus -->
+  <line x1="31" y1="12" x2="41" y2="12" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- bottom-left: minus -->
+  <line x1="7"  y1="36" x2="17" y2="36" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- bottom-right: plus -->
+  <line x1="36" y1="31" x2="36" y2="41" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+  <line x1="31" y1="36" x2="41" y2="36" stroke="#9B8CC4" stroke-width="1.6" stroke-linecap="round"/>
+</svg>`)
+      },
+    ];
 
-      // Easter & Good Friday
-      const easter = calcEaster(yr);
-      add(easter.getMonth()+1, easter.getDate(), "Easter Sunday");
-      const gf = new Date(easter); gf.setDate(gf.getDate()-2);
-      add(gf.getMonth()+1, gf.getDate(), "Good Friday");
-
-      holidayCache[yr] = h;
-      return h;
-    }
-
-    /* ── Render calendar ────────────────────────────────────── */
-    function render() {
-      const yr    = current.getFullYear();
-      const mo    = current.getMonth();
-      const start = new Date(yr, mo, 1).getDay();
-      const total = new Date(yr, mo+1, 0).getDate();
-      const hols  = getHolidays(yr);
-
-      // Update month/year labels
-      document.getElementById('monthPick').textContent = MONTHS[mo];
-      document.getElementById('yearPick').textContent  = yr;
-
-      // DOW header
-      document.getElementById('dowRow').innerHTML =
-        DAYS.map(d => `<div class="dow-cell">${d}</div>`).join('');
-
-      // Day grid
-      const grid = document.getElementById('dayGrid');
-      grid.innerHTML = '';
-
-      for (let i = 0; i < start; i++)
-        grid.insertAdjacentHTML('beforeend', '<div class="day-cell"></div>');
-
-      for (let d = 1; d <= total; d++) {
-        const date = new Date(yr, mo, d);
-        const k    = key(date);
-        const cls  = ['day-btn',
-          isToday(date)                    ? 'today'    : '',
-          !isToday(date) && isSel(date)    ? 'selected' : '',
-          events[k]?.length                ? 'has-event': '',
-          hols[k]?.length                  ? 'holiday'  : '',
-        ].filter(Boolean).join(' ');
-
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        const btn = document.createElement('button');
-        btn.className = cls;
-        btn.textContent = d;
-        btn.addEventListener('click', () => { btn.blur(); selected = date; render(); renderEvents(); });
-        cell.appendChild(btn);
-        grid.appendChild(cell);
-      }
-
-      renderStrip();
-    }
-
-    /* ── Render events ──────────────────────────────────────── */
-    function renderEvents() {
-      const k     = key(selected);
-      const list  = events[k] || [];
-      const hols  = getHolidays(selected.getFullYear())[k] || [];
-
-      document.getElementById('eventTitle').textContent =
-        selected.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
-
-      const el = document.getElementById('eventList');
-      el.innerHTML = '';
-
-      // Holidays first
-      hols.forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'holiday-item';
-        item.innerHTML = `<span class="material-icons-round holiday-icon">star</span>
-                          <span class="event-text">${name}</span>`;
-        el.appendChild(item);
-      });
-
-      // User events
-      if (!list.length && !hols.length) {
-        el.innerHTML = '<div class="event-none">No events — add one below</div>';
-        return;
-      }
-      list.forEach((e, i) => {
-        const item = document.createElement('div');
-        item.className = 'event-item';
-        item.innerHTML = `<span class="event-dot" style="background:${e.color}"></span>
-                          <span class="event-text">${e.text}</span>
-                          <button class="event-delete" title="Delete">
-                            <span class="material-icons-round" style="font-size:16px">close</span>
-                          </button>`;
-        item.querySelector('.event-delete').addEventListener('click', () => {
-          events[k].splice(i, 1);
-          if (!events[k].length) delete events[k];
-          render(); renderEvents();
-        });
-        el.appendChild(item);
-      });
-    }
-
-    /* ── Add event ──────────────────────────────────────────── */
-    function addEvent() {
-      const input = document.getElementById('eventInput');
-      const text  = input.value.trim();
-      if (!text) return;
-      const k = key(selected);
-      if (!events[k]) events[k] = [];
-      events[k].push({ text, color: document.getElementById('eventColorInput').value });
-      input.value = '';
-      render(); renderEvents();
-    }
-    document.getElementById('addBtn').addEventListener('click', addEvent);
-    document.getElementById('eventInput').addEventListener('keydown', e => { if (e.key==='Enter') addEvent(); });
-
-    const evColorInput  = document.getElementById('eventColorInput');
-    const evColorSwatch = document.getElementById('eventColorSwatch');
-    evColorSwatch.style.background = evColorInput.value;
-    evColorInput.addEventListener('input', () => { evColorSwatch.style.background = evColorInput.value; });
-
-    /* ── Strip ──────────────────────────────────────────────── */
-    function renderStrip() {
-      const yr    = current.getFullYear();
-      const mo    = current.getMonth();
-      const total = new Date(yr, mo+1, 0).getDate();
-      const hols  = getHolidays(yr);
-
-      document.getElementById('stripLabel').textContent = `${MONTHS[mo]} at a glance`;
-      const strip = document.getElementById('strip');
-      strip.innerHTML = '';
-
-      for (let d = 1; d <= total; d++) {
-        const date = new Date(yr, mo, d);
-        const k    = key(date);
-        const wd   = date.getDay();
-
-        // Week separator before each Sunday (except first day)
-        if (wd === 0 && d > 1) {
-          const sep = document.createElement('div');
-          sep.className = 'strip-week-sep';
-          strip.appendChild(sep);
-        }
-
-        const wrap = document.createElement('div');
-        wrap.className = 'strip-day';
-
-        const dow = document.createElement('div');
-        dow.className = 'strip-dow';
-        dow.textContent = DAYS[wd][0];
-
-        const num = document.createElement('div');
-        num.className = ['strip-num',
-          isToday(date)                  ? 's-today'   : '',
-          !isToday(date) && isSel(date)  ? 's-sel'     : '',
-          events[k]?.length              ? 's-event'   : '',
-          hols[k]?.length                ? 's-holiday' : '',
-        ].filter(Boolean).join(' ');
-        num.textContent = d;
-        num.addEventListener('click', () => { selected = date; render(); renderEvents(); });
-
-        wrap.appendChild(dow);
-        wrap.appendChild(num);
-        strip.appendChild(wrap);
-      }
-
-      // Scroll strip to selected day without scrolling the page
-      if (selected.getFullYear()===yr && selected.getMonth()===mo) {
-        const idx    = selected.getDate() - 1;
-        const target = strip.children[Math.max(idx - 2, 0)];
-        if (target) strip.scrollLeft = target.offsetLeft - 16;
-      }
-    }
-
-    /* ── Month nav buttons ──────────────────────────────────── */
-    document.getElementById('prevBtn').addEventListener('click', e => {
-      e.preventDefault(); e.currentTarget.blur();
-      current = new Date(current.getFullYear(), current.getMonth()-1, 1);
-      render(); renderEvents();
-    });
-    document.getElementById('nextBtn').addEventListener('click', e => {
-      e.preventDefault(); e.currentTarget.blur();
-      current = new Date(current.getFullYear(), current.getMonth()+1, 1);
-      render(); renderEvents();
-    });
-
-    /* ── Month picker ───────────────────────────────────────── */
-    const monthPopup = document.getElementById('monthPopup');
-    const yearPopup  = document.getElementById('yearPopup');
-
-    function buildMonthGrid() {
-      const grid = document.getElementById('monthGrid');
-      grid.innerHTML = '';
-      MONTHS_SHORT.forEach((m, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'picker-cell' + (i === current.getMonth() ? ' active' : '');
-        btn.textContent = m;
-        btn.addEventListener('click', () => {
-          current = new Date(current.getFullYear(), i, 1);
-          closeAllPickers(); render(); renderEvents();
-        });
-        grid.appendChild(btn);
-      });
-    }
-
-    document.getElementById('monthPick').addEventListener('click', e => {
-      e.stopPropagation();
-      const opening = !monthPopup.classList.contains('open');
-      closeAllPickers();
-      if (opening) { buildMonthGrid(); monthPopup.classList.add('open'); }
-    });
-
-    /* ── Year picker ────────────────────────────────────────── */
-    let yearRangeStart = Math.floor(current.getFullYear() / 12) * 12;
-
-    function buildYearGrid() {
-      const grid = document.getElementById('yearGrid');
-      grid.innerHTML = '';
-      document.getElementById('yearRangeLabel').textContent =
-        `${yearRangeStart} – ${yearRangeStart + 11}`;
-      for (let y = yearRangeStart; y < yearRangeStart + 12; y++) {
-        const btn = document.createElement('button');
-        btn.className = 'picker-cell' + (y === current.getFullYear() ? ' active' : '');
-        btn.textContent = y;
-        btn.addEventListener('click', () => {
-          current = new Date(y, current.getMonth(), 1);
-          closeAllPickers(); render(); renderEvents();
-        });
-        grid.appendChild(btn);
-      }
-    }
-
-    document.getElementById('yearPick').addEventListener('click', e => {
-      e.stopPropagation();
-      const opening = !yearPopup.classList.contains('open');
-      closeAllPickers();
-      if (opening) {
-        yearRangeStart = Math.floor(current.getFullYear() / 12) * 12;
-        buildYearGrid();
-        yearPopup.classList.add('open');
-      }
-    });
-
-    document.getElementById('yearRangePrev').addEventListener('click', e => {
-      e.stopPropagation(); yearRangeStart -= 12; buildYearGrid();
-    });
-    document.getElementById('yearRangeNext').addEventListener('click', e => {
-      e.stopPropagation(); yearRangeStart += 12; buildYearGrid();
-    });
-
-    function closeAllPickers() {
-      monthPopup.classList.remove('open');
-      yearPopup.classList.remove('open');
-    }
-
-    // Close pickers on outside click
-    document.addEventListener('click', e => {
-      if (!document.getElementById('monthLabelWrap').contains(e.target)) closeAllPickers();
-    });
-    document.getElementById('monthLabelWrap').addEventListener('click', e => e.stopPropagation());
-    document.addEventListener('keydown', e => { if (e.key==='Escape') closeAllPickers(); });
-
-    /* ── Settings panel ─────────────────────────────────────── */
-    const settingsPanel = document.getElementById('settingsPanel');
-    const settingsBtn   = document.getElementById('settingsBtn');
-
-    settingsBtn.addEventListener('click', e => {
-      e.stopPropagation(); settingsPanel.classList.toggle('open');
-    });
-    document.getElementById('settingsClose').addEventListener('click', () => settingsPanel.classList.remove('open'));
-    document.addEventListener('click', e => {
-      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn)
-        settingsPanel.classList.remove('open');
-    });
-    settingsPanel.addEventListener('click', e => e.stopPropagation());
-    document.addEventListener('keydown', e => { if (e.key==='Escape') settingsPanel.classList.remove('open'); });
-
-    /* ── Font selection ─────────────────────────────────────── */
-    document.getElementById('fontOptions').addEventListener('click', e => {
-      const btn = e.target.closest('.font-btn');
-      if (!btn) return;
-      document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.documentElement.style.setProperty('--font-ui', btn.dataset.font);
-      document.body.classList.toggle('font-michroma', btn.dataset.font.startsWith("'Michroma'"));
-    });
-
-    /* ── Accent colour ──────────────────────────────────────── */
-    const accentInput = document.getElementById('accentColorInput');
-    const colorSwatch = document.getElementById('colorSwatchLarge');
-
-    function applyAccent(hex) {
-      document.documentElement.style.setProperty('--primary', hex);
-      document.documentElement.style.setProperty('--primary-dark', darken(hex, .15));
-      colorSwatch.style.background = hex;
-      if (evColorInput.value === evColorInput.defaultValue) {
-        evColorInput.value = hex;
-        evColorSwatch.style.background = hex;
-      }
-      accentInput.defaultValue = hex;
-    }
-    colorSwatch.style.background = accentInput.value;
-    accentInput.addEventListener('input', () => applyAccent(accentInput.value));
-
-    /* ── Background image ───────────────────────────────────── */
-    const removeBgBtn = document.getElementById('removeBgBtn');
+    /* ═══════════════════════════════════════════════════════════
+       BACKGROUND STATE & APPLY
+    ══════════════════════════════════════════════════════════════ */
+    let activeBgType  = 'none'; // 'none' | 'color' | 'wallpaper' | 'custom'
+    let activeBgValue = null;   // color hex | wallpaper index | null
     let bgObjectURL   = null;
 
-    function applyBgUrl(url) {
-      document.body.style.backgroundImage = `url('${url}')`;
-      document.body.classList.add('has-bg');
-      removeBgBtn.classList.add('active');
+    function clearBgClasses() {
+      document.querySelectorAll('.bg-color-swatch').forEach(e => e.classList.remove('bg-active'));
+      document.querySelectorAll('.wallpaper-thumb' ).forEach(e => e.classList.remove('bg-active'));
     }
+
+    function applyColorBg(hex, swatchEl) {
+      clearBg(false);
+      document.body.style.backgroundColor = hex;
+      activeBgType = 'color'; activeBgValue = hex;
+      clearBgClasses();
+      if (swatchEl) swatchEl.classList.add('bg-active');
+      document.getElementById('removeBgBtn').classList.add('active');
+    }
+
+    function applyWallpaper(idx, thumbEl) {
+      clearBg(false);
+      const wp = WALLPAPERS[idx];
+      document.body.style.backgroundImage = wp.pattern;
+      document.body.style.backgroundSize  = wp.size;
+      document.body.style.backgroundColor = wp.bgColor;
+      document.body.classList.add('has-bg');
+      activeBgType = 'wallpaper'; activeBgValue = idx;
+      clearBgClasses();
+      if (thumbEl) thumbEl.classList.add('bg-active');
+      document.getElementById('removeBgBtn').classList.add('active');
+    }
+
+    function applyBgUrl(url) {
+      clearBg(false);
+      document.body.style.backgroundImage = `url('${url}')`;
+      document.body.style.backgroundSize  = 'cover';
+      document.body.classList.add('has-bg');
+      activeBgType = 'custom'; activeBgValue = null;
+      clearBgClasses();
+      document.getElementById('removeBgBtn').classList.add('active');
+    }
+
     function applyBgFile(file) {
       if (!file.type.startsWith('image/')) return;
       if (bgObjectURL) URL.revokeObjectURL(bgObjectURL);
@@ -1011,25 +811,66 @@
       applyBgUrl(bgObjectURL);
     }
 
+    function clearBg(resetBtn = true) {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize  = 'auto';
+      document.body.style.backgroundColor = '';
+      document.body.classList.remove('has-bg');
+      if (resetBtn) {
+        clearBgClasses();
+        document.getElementById('removeBgBtn').classList.remove('active');
+        document.getElementById('bgInput').value = '';
+        if (bgObjectURL) { URL.revokeObjectURL(bgObjectURL); bgObjectURL = null; }
+        activeBgType = 'none'; activeBgValue = null;
+      }
+    }
+
+    /* ── Build colour swatches ──────────────────────────────── */
+    const bgColorRow = document.getElementById('bgColorRow');
+    BG_COLORS.forEach(({ color }) => {
+      const s = document.createElement('div');
+      s.className = 'bg-color-swatch';
+      s.style.background = color;
+      s.title = color;
+      s.addEventListener('click', () => applyColorBg(color, s));
+      bgColorRow.appendChild(s);
+    });
+
+    /* ── Build wallpaper thumbnails ─────────────────────────── */
+    const wallpaperGrid = document.getElementById('wallpaperGrid');
+    WALLPAPERS.forEach((wp, i) => {
+      const item = document.createElement('div');
+      item.className = 'wallpaper-item';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'wallpaper-thumb';
+      thumb.style.backgroundImage = wp.pattern;
+      thumb.style.backgroundSize  = wp.size;
+      thumb.style.backgroundColor = wp.bgColor;
+      thumb.title = wp.name;
+      thumb.addEventListener('click', () => applyWallpaper(i, thumb));
+
+      const label = document.createElement('div');
+      label.className = 'wallpaper-label';
+      label.textContent = wp.name;
+
+      item.appendChild(thumb);
+      item.appendChild(label);
+      wallpaperGrid.appendChild(item);
+    });
+
+    /* ── Custom photo upload ────────────────────────────────── */
     document.getElementById('bgInput').addEventListener('change', e => {
       const f = e.target.files[0]; if (f) applyBgFile(f);
     });
-    removeBgBtn.addEventListener('click', () => {
-      document.body.style.backgroundImage = '';
-      document.body.classList.remove('has-bg');
-      removeBgBtn.classList.remove('active');
-      document.getElementById('bgInput').value = '';
-      if (bgObjectURL) { URL.revokeObjectURL(bgObjectURL); bgObjectURL = null; }
-    });
+    document.getElementById('removeBgBtn').addEventListener('click', () => clearBg(true));
 
-    /* ── Drag-and-drop ──────────────────────────────────────── */
+    /* ── Drag & drop ────────────────────────────────────────── */
     const dropZone = document.getElementById('dropZone');
-
     [dropZone, document.body].forEach(el => {
-      el.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+      el.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
       el.addEventListener('dragleave', e => { if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over'); });
     });
-
     function handleDrop(e) {
       e.preventDefault(); dropZone.classList.remove('drag-over');
       const imgFile = [...(e.dataTransfer.files||[])].find(f => f.type.startsWith('image/'));
@@ -1043,21 +884,267 @@
     dropZone.addEventListener('drop', handleDrop);
     document.body.addEventListener('drop', handleDrop);
 
-    /* ── Dark / light mode ──────────────────────────────────── */
-    const html = document.documentElement;
-    const pref = window.matchMedia('(prefers-color-scheme: dark)');
-
-    function applyTheme(dark) {
-      html.setAttribute('data-theme', dark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = dark ? 'light_mode' : 'dark_mode';
+    /* ═══════════════════════════════════════════════════════════
+       HOLIDAYS
+    ══════════════════════════════════════════════════════════════ */
+    const holidayCache = {};
+    function calcEaster(yr) {
+      const a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4;
+      const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
+      const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
+      const l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+      const month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
+      return new Date(yr,month-1,day);
     }
-    applyTheme(pref.matches);
-    pref.addEventListener('change', e => applyTheme(e.matches));
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      applyTheme(html.getAttribute('data-theme') !== 'dark');
+    function nthWeekday(yr,mo,wd,n) {
+      if (n>0) { const f=new Date(yr,mo-1,1).getDay(); return 1+((wd-f+7)%7)+(n-1)*7; }
+      const last=new Date(yr,mo,0); return last.getDate()-((last.getDay()-wd+7)%7);
+    }
+    function getHolidays(yr) {
+      if (holidayCache[yr]) return holidayCache[yr];
+      const h={};
+      const add=(mo,d,name)=>{ const k=`${yr}-${p2(mo)}-${p2(d)}`; (h[k]=h[k]||[]).push(name); };
+      add(1,1,"New Year's Day"); add(2,14,"Valentine's Day");
+      add(7,1,"Canada Day"); add(7,4,"Independence Day");
+      add(10,31,"Halloween"); add(11,11,"Remembrance / Veterans Day");
+      add(12,24,"Christmas Eve"); add(12,25,"Christmas Day"); add(12,26,"Boxing Day"); add(12,31,"New Year's Eve");
+      add(1,nthWeekday(yr,1,1,3),"Martin Luther King Jr. Day");
+      add(2,nthWeekday(yr,2,1,3),"Presidents' Day / Family Day");
+      add(5,nthWeekday(yr,5,1,-1),"Memorial Day");
+      add(9,nthWeekday(yr,9,1,1),"Labour Day");
+      add(10,nthWeekday(yr,10,1,2),"Thanksgiving (CA) · Columbus Day");
+      add(11,nthWeekday(yr,11,4,4),"Thanksgiving (US)");
+      const vic=new Date(yr,4,24); while(vic.getDay()!==1) vic.setDate(vic.getDate()-1);
+      add(5,vic.getDate(),"Victoria Day");
+      const easter=calcEaster(yr);
+      add(easter.getMonth()+1,easter.getDate(),"Easter Sunday");
+      const gf=new Date(easter); gf.setDate(gf.getDate()-2);
+      add(gf.getMonth()+1,gf.getDate(),"Good Friday");
+      holidayCache[yr]=h; return h;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CALENDAR RENDER
+    ══════════════════════════════════════════════════════════════ */
+    function render() {
+      const yr=current.getFullYear(), mo=current.getMonth();
+      const start=new Date(yr,mo,1).getDay(), total=new Date(yr,mo+1,0).getDate();
+      const hols=getHolidays(yr);
+
+      document.getElementById('monthPick').textContent = MONTHS[mo];
+      document.getElementById('yearPick' ).textContent = yr;
+
+      document.getElementById('dowRow').innerHTML =
+        DAYS.map(d=>`<div class="dow-cell">${d}</div>`).join('');
+
+      const grid=document.getElementById('dayGrid'); grid.innerHTML='';
+      for(let i=0;i<start;i++) grid.insertAdjacentHTML('beforeend','<div class="day-cell"></div>');
+      for(let d=1;d<=total;d++){
+        const date=new Date(yr,mo,d), k=key(date);
+        const cls=['day-btn',
+          isToday(date)?'today':'',
+          !isToday(date)&&isSel(date)?'selected':'',
+          events[k]?.length?'has-event':'',
+          hols[k]?.length?'holiday':'',
+        ].filter(Boolean).join(' ');
+        const cell=document.createElement('div'); cell.className='day-cell';
+        const btn=document.createElement('button'); btn.className=cls; btn.textContent=d;
+        btn.addEventListener('click',()=>{ btn.blur(); selected=date; render(); renderEvents(); });
+        cell.appendChild(btn); grid.appendChild(cell);
+      }
+      renderStrip();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       EVENTS RENDER
+    ══════════════════════════════════════════════════════════════ */
+    function renderEvents() {
+      const k=key(selected), list=events[k]||[];
+      const hols=getHolidays(selected.getFullYear())[k]||[];
+      document.getElementById('eventTitle').textContent =
+        selected.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+      const el=document.getElementById('eventList'); el.innerHTML='';
+      hols.forEach(name=>{
+        const item=document.createElement('div'); item.className='holiday-item';
+        item.innerHTML=`<span class="material-icons-round holiday-icon">star</span><span class="event-text">${name}</span>`;
+        el.appendChild(item);
+      });
+      if(!list.length&&!hols.length){
+        el.innerHTML='<div class="event-none">No events — add one below</div>'; return;
+      }
+      list.forEach((e,i)=>{
+        const item=document.createElement('div'); item.className='event-item';
+        item.innerHTML=`<span class="event-dot" style="background:${e.color}"></span>
+          <span class="event-text">${e.text}</span>
+          <button class="event-delete" title="Delete"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
+        item.querySelector('.event-delete').addEventListener('click',()=>{
+          events[k].splice(i,1); if(!events[k].length) delete events[k];
+          render(); renderEvents();
+        });
+        el.appendChild(item);
+      });
+    }
+
+    function addEvent(){
+      const input=document.getElementById('eventInput'), text=input.value.trim();
+      if(!text) return;
+      const k=key(selected);
+      if(!events[k]) events[k]=[];
+      events[k].push({text,color:document.getElementById('eventColorInput').value});
+      input.value=''; render(); renderEvents();
+    }
+    document.getElementById('addBtn').addEventListener('click',addEvent);
+    document.getElementById('eventInput').addEventListener('keydown',e=>{ if(e.key==='Enter') addEvent(); });
+
+    const evColorInput=document.getElementById('eventColorInput');
+    const evColorSwatch=document.getElementById('eventColorSwatch');
+    evColorSwatch.style.background=evColorInput.value;
+    evColorInput.addEventListener('input',()=>{ evColorSwatch.style.background=evColorInput.value; });
+
+    /* ═══════════════════════════════════════════════════════════
+       STRIP
+    ══════════════════════════════════════════════════════════════ */
+    function renderStrip(){
+      const yr=current.getFullYear(), mo=current.getMonth();
+      const total=new Date(yr,mo+1,0).getDate(), hols=getHolidays(yr);
+      document.getElementById('stripLabel').textContent=`${MONTHS[mo]} at a glance`;
+      const strip=document.getElementById('strip'); strip.innerHTML='';
+      for(let d=1;d<=total;d++){
+        const date=new Date(yr,mo,d), k=key(date), wd=date.getDay();
+        if(wd===0&&d>1){ const sep=document.createElement('div'); sep.className='strip-week-sep'; strip.appendChild(sep); }
+        const wrap=document.createElement('div'); wrap.className='strip-day';
+        const dow=document.createElement('div'); dow.className='strip-dow'; dow.textContent=DAYS[wd][0];
+        const num=document.createElement('div');
+        num.className=['strip-num',
+          isToday(date)?'s-today':'',
+          !isToday(date)&&isSel(date)?'s-sel':'',
+          events[k]?.length?'s-event':'',
+          hols[k]?.length?'s-holiday':'',
+        ].filter(Boolean).join(' ');
+        num.textContent=d;
+        num.addEventListener('click',()=>{ selected=date; render(); renderEvents(); });
+        wrap.appendChild(dow); wrap.appendChild(num); strip.appendChild(wrap);
+      }
+      if(selected.getFullYear()===yr&&selected.getMonth()===mo){
+        const target=strip.children[Math.max(selected.getDate()-2,0)];
+        if(target) strip.scrollLeft=target.offsetLeft-16;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MONTH / YEAR PICKERS
+    ══════════════════════════════════════════════════════════════ */
+    const monthPopup=document.getElementById('monthPopup');
+    const yearPopup =document.getElementById('yearPopup');
+
+    function buildMonthGrid(){
+      const grid=document.getElementById('monthGrid'); grid.innerHTML='';
+      MONTHS_SHORT.forEach((m,i)=>{
+        const btn=document.createElement('button');
+        btn.className='picker-cell'+(i===current.getMonth()?' active':'');
+        btn.textContent=m;
+        btn.addEventListener('click',()=>{ current=new Date(current.getFullYear(),i,1); closeAllPickers(); render(); renderEvents(); });
+        grid.appendChild(btn);
+      });
+    }
+    document.getElementById('monthPick').addEventListener('click',e=>{
+      e.stopPropagation(); const opening=!monthPopup.classList.contains('open');
+      closeAllPickers(); if(opening){ buildMonthGrid(); monthPopup.classList.add('open'); }
     });
 
-    /* ── Init ───────────────────────────────────────────────── */
+    let yearRangeStart=Math.floor(current.getFullYear()/12)*12;
+    function buildYearGrid(){
+      const grid=document.getElementById('yearGrid'); grid.innerHTML='';
+      document.getElementById('yearRangeLabel').textContent=`${yearRangeStart} – ${yearRangeStart+11}`;
+      for(let y=yearRangeStart;y<yearRangeStart+12;y++){
+        const btn=document.createElement('button');
+        btn.className='picker-cell'+(y===current.getFullYear()?' active':'');
+        btn.textContent=y;
+        btn.addEventListener('click',()=>{ current=new Date(y,current.getMonth(),1); closeAllPickers(); render(); renderEvents(); });
+        grid.appendChild(btn);
+      }
+    }
+    document.getElementById('yearPick').addEventListener('click',e=>{
+      e.stopPropagation(); const opening=!yearPopup.classList.contains('open');
+      closeAllPickers();
+      if(opening){ yearRangeStart=Math.floor(current.getFullYear()/12)*12; buildYearGrid(); yearPopup.classList.add('open'); }
+    });
+    document.getElementById('yearRangePrev').addEventListener('click',e=>{ e.stopPropagation(); yearRangeStart-=12; buildYearGrid(); });
+    document.getElementById('yearRangeNext').addEventListener('click',e=>{ e.stopPropagation(); yearRangeStart+=12; buildYearGrid(); });
+
+    function closeAllPickers(){ monthPopup.classList.remove('open'); yearPopup.classList.remove('open'); }
+    document.addEventListener('click',e=>{ if(!document.getElementById('monthLabelWrap').contains(e.target)) closeAllPickers(); });
+    document.getElementById('monthLabelWrap').addEventListener('click',e=>e.stopPropagation());
+
+    /* ═══════════════════════════════════════════════════════════
+       MONTH NAV ARROWS
+    ══════════════════════════════════════════════════════════════ */
+    document.getElementById('prevBtn').addEventListener('click',e=>{
+      e.preventDefault(); e.currentTarget.blur();
+      current=new Date(current.getFullYear(),current.getMonth()-1,1); render(); renderEvents();
+    });
+    document.getElementById('nextBtn').addEventListener('click',e=>{
+      e.preventDefault(); e.currentTarget.blur();
+      current=new Date(current.getFullYear(),current.getMonth()+1,1); render(); renderEvents();
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       SETTINGS PANEL
+    ══════════════════════════════════════════════════════════════ */
+    const settingsPanel=document.getElementById('settingsPanel');
+    const settingsBtn  =document.getElementById('settingsBtn');
+    settingsBtn.addEventListener('click',e=>{ e.stopPropagation(); settingsPanel.classList.toggle('open'); });
+    document.getElementById('settingsClose').addEventListener('click',()=>settingsPanel.classList.remove('open'));
+    document.addEventListener('click',e=>{
+      if(!settingsPanel.contains(e.target)&&e.target!==settingsBtn) settingsPanel.classList.remove('open');
+    });
+    settingsPanel.addEventListener('click',e=>e.stopPropagation());
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ settingsPanel.classList.remove('open'); closeAllPickers(); } });
+
+    /* ═══════════════════════════════════════════════════════════
+       FONT SELECTION
+    ══════════════════════════════════════════════════════════════ */
+    document.getElementById('fontOptions').addEventListener('click',e=>{
+      const btn=e.target.closest('.font-btn'); if(!btn) return;
+      document.querySelectorAll('.font-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.documentElement.style.setProperty('--font-ui',btn.dataset.font);
+      document.body.classList.toggle('font-michroma',btn.dataset.font.startsWith("'Michroma'"));
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       ACCENT COLOUR
+    ══════════════════════════════════════════════════════════════ */
+    const accentInput=document.getElementById('accentColorInput');
+    const colorSwatch=document.getElementById('colorSwatchLarge');
+    function applyAccent(hex){
+      document.documentElement.style.setProperty('--primary',hex);
+      document.documentElement.style.setProperty('--primary-dark',darken(hex,.15));
+      colorSwatch.style.background=hex;
+      if(evColorInput.value===evColorInput.defaultValue){ evColorInput.value=hex; evColorSwatch.style.background=hex; }
+      accentInput.defaultValue=hex;
+    }
+    colorSwatch.style.background=accentInput.value;
+    accentInput.addEventListener('input',()=>applyAccent(accentInput.value));
+
+    /* ═══════════════════════════════════════════════════════════
+       DARK / LIGHT MODE
+    ══════════════════════════════════════════════════════════════ */
+    const html=document.documentElement;
+    const pref=window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(dark){
+      html.setAttribute('data-theme',dark?'dark':'light');
+      document.getElementById('themeIcon').textContent=dark?'light_mode':'dark_mode';
+    }
+    applyTheme(pref.matches);
+    pref.addEventListener('change',e=>applyTheme(e.matches));
+    document.getElementById('themeToggle').addEventListener('click',()=>{
+      applyTheme(html.getAttribute('data-theme')!=='dark');
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════════════════════════ */
     render();
     renderEvents();
   </script>
