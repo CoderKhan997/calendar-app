@@ -490,10 +490,169 @@
     .strip-num.s-today.s-event::after,.strip-num.s-sel.s-event::after { background:rgba(255,255,255,.75); }
     .strip-num.s-today.s-holiday::before,.strip-num.s-sel.s-holiday::before { background:rgba(255,255,255,.85); }
     .strip-week-sep { width:1.5px;align-self:stretch;background:var(--surface2);border-radius:2px;flex-shrink:0;margin:0 3px; }
+
+    /* ── Two-column page layout ──────────────────────────────── */
+    .main-row {
+      display:flex;flex-direction:row;gap:20px;align-items:flex-start;
+      justify-content:center;flex-wrap:wrap;width:100%;
+    }
+    .left-col  { display:flex;flex-direction:column;align-items:center;flex:0 0 540px;max-width:540px; }
+    .right-col { display:flex;flex-direction:column;gap:16px;flex:0 0 272px;max-width:272px; }
+
+    /* ── Shared widget card ──────────────────────────────────── */
+    .widget-card {
+      background:var(--surface);border-radius:var(--radius-card);
+      box-shadow:var(--shadow-card);width:100%;
+      transition:background var(--transition),box-shadow var(--transition);
+    }
+    body.has-bg .widget-card {
+      background:rgba(255,255,255,.82);
+      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    }
+    [data-theme="dark"] body.has-bg .widget-card { background:rgba(37,31,58,.82); }
+    .widget-inner { padding:16px 18px 14px; }
+    .widget-header {
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:10px;position:relative;
+    }
+    .widget-title {
+      font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+      color:var(--on-surface-dim);
+    }
+    .widget-cog {
+      background:none;border:none;cursor:pointer;color:var(--on-surface-dim);
+      width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+      justify-content:center;transition:background .15s,color .15s;flex-shrink:0;
+    }
+    .widget-cog:hover { background:var(--surface2);color:var(--on-surface); }
+
+    /* Widget settings panel */
+    .widget-panel {
+      position:absolute;top:calc(100% + 8px);right:0;width:244px;
+      background:var(--surface);border-radius:16px;
+      box-shadow:0 8px 32px rgba(0,0,0,.2);padding:16px;z-index:400;
+      opacity:0;transform:translateY(-8px) scale(.95);pointer-events:none;
+      transform-origin:top right;
+      transition:opacity .2s cubic-bezier(.4,0,.2,1),transform .2s cubic-bezier(.4,0,.2,1);
+      max-height:80vh;overflow-y:auto;
+      scrollbar-width:thin;scrollbar-color:var(--primary) var(--surface2);
+    }
+    .widget-panel::-webkit-scrollbar { width:4px; }
+    .widget-panel::-webkit-scrollbar-track { background:var(--surface2);border-radius:8px; }
+    .widget-panel::-webkit-scrollbar-thumb { background:var(--primary);border-radius:8px; }
+    .widget-panel.open { opacity:1;transform:translateY(0) scale(1);pointer-events:all; }
+    body.has-bg .widget-panel {
+      backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+      background:rgba(255,255,255,.94);
+    }
+    [data-theme="dark"] body.has-bg .widget-panel { background:rgba(37,31,58,.94); }
+
+    /* Small font buttons for widget panels */
+    .wfont-options { display:flex;flex-direction:column;gap:4px; }
+    .wfont-btn {
+      background:transparent;border:1.5px solid var(--surface2);border-radius:8px;
+      padding:7px 10px;cursor:pointer;text-align:left;font-size:12px;
+      color:var(--on-surface);display:flex;align-items:center;justify-content:space-between;
+      transition:border-color .15s,background .15s;
+    }
+    .wfont-btn:hover  { border-color:var(--primary);background:var(--surface2); }
+    .wfont-btn.active { border-color:var(--primary);background:var(--surface2); }
+    .wfont-btn .wcheck { font-size:14px;color:var(--primary);opacity:0;transition:opacity .15s; }
+    .wfont-btn.active .wcheck { opacity:1; }
+
+    /* Color row for widget panels */
+    .wcolor-row { display:flex;align-items:center;gap:10px; }
+    .wcolor-wheel {
+      width:38px;height:38px;border-radius:50%;flex-shrink:0;
+      background:conic-gradient(hsl(0,85%,65%) 0deg,hsl(30,85%,65%) 40deg,hsl(60,85%,65%) 80deg,
+        hsl(120,75%,60%) 130deg,hsl(180,75%,55%) 180deg,hsl(210,75%,60%) 210deg,
+        hsl(240,75%,65%) 240deg,hsl(280,75%,65%) 280deg,hsl(320,80%,65%) 320deg,hsl(360,85%,65%) 360deg);
+      padding:3px;cursor:pointer;position:relative;
+      transition:transform .15s;box-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+    .wcolor-wheel:hover { transform:scale(1.1); }
+    .wcolor-center { width:100%;height:100%;border-radius:50%;background:var(--surface);pointer-events:none; }
+    .wcolor-swatch { width:26px;height:26px;border-radius:50%;border:2.5px solid var(--surface2);flex-shrink:0;transition:background .2s; }
+
+    /* Timezone select */
+    .tz-select {
+      width:100%;background:var(--surface2);border:1.5px solid var(--surface2);
+      border-radius:10px;padding:8px 10px;font-size:12px;color:var(--on-surface);
+      font-family:var(--font-ui);cursor:pointer;outline:none;
+      transition:border-color .15s;
+    }
+    .tz-select:focus { border-color:var(--primary); }
+    [data-theme="dark"] .tz-select { background:var(--surface2);color:var(--on-surface); }
+    .tz-select option { background:var(--surface);color:var(--on-surface); }
+
+    /* Action button (clear history) */
+    .widget-action-btn {
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      background:transparent;border:1.5px solid var(--surface2);border-radius:10px;
+      padding:8px 12px;font-size:12px;color:var(--on-surface-dim);cursor:pointer;
+      width:100%;transition:border-color .15s,color .15s,background .15s;font-family:var(--font-ui);
+    }
+    .widget-action-btn:hover { border-color:#F4A9A8;color:#C0605F;background:rgba(244,169,168,.08); }
+
+    /* ── Clock widget ─────────────────────────────────────────── */
+    .clock-display { text-align:center;padding:6px 0 4px; }
+    .clock-time {
+      font-size:40px;font-weight:700;letter-spacing:-1.5px;line-height:1;
+      color:var(--clock-accent,var(--primary));
+      font-variant-numeric:tabular-nums;transition:color .3s;
+      display:flex;align-items:baseline;justify-content:center;gap:0;
+    }
+    .clock-hm   { font-size:40px;font-weight:700;letter-spacing:-1.5px; }
+    .clock-sec  { font-size:20px;font-weight:400;opacity:.6;letter-spacing:0; }
+    .clock-ampm { font-size:14px;font-weight:500;opacity:.75;margin-left:3px;align-self:flex-end;padding-bottom:2px; }
+    .clock-date-line { font-size:11.5px;color:var(--on-surface-dim);margin-top:7px;font-weight:500; }
+    .clock-tz-line   { font-size:10px;color:var(--on-surface-dim);opacity:.7;margin-top:2px;letter-spacing:.3px; }
+
+    /* ── Calculator widget ────────────────────────────────────── */
+    .calc-history {
+      min-height:28px;max-height:52px;overflow-y:auto;text-align:right;
+      padding:0 14px 4px;
+      scrollbar-width:thin;scrollbar-color:var(--surface2) transparent;
+      font-size:10.5px;color:var(--on-surface-dim);line-height:1.65;
+    }
+    .calc-history::-webkit-scrollbar { width:3px; }
+    .calc-history::-webkit-scrollbar-thumb { background:var(--surface2);border-radius:4px; }
+    .calc-display-wrap { padding:2px 14px 8px;text-align:right; }
+    .calc-expr    { font-size:11px;color:var(--on-surface-dim);min-height:15px; }
+    .calc-display {
+      font-size:34px;font-weight:700;letter-spacing:-1px;line-height:1.1;
+      color:var(--calc-accent,var(--primary));font-variant-numeric:tabular-nums;
+      word-break:break-all;transition:color .3s;
+    }
+    .calc-grid {
+      display:grid;grid-template-columns:repeat(4,1fr);
+      gap:6px;padding:0 12px 14px;
+    }
+    .calc-btn {
+      padding:0;height:50px;border:none;border-radius:12px;cursor:pointer;
+      font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;
+      transition:background .12s,transform .08s;
+      color:var(--on-surface);background:var(--surface2);font-family:inherit;
+    }
+    .calc-btn:active { transform:scale(.90); }
+    .calc-btn:hover  { filter:brightness(1.07); }
+    .calc-btn.op {
+      background:rgba(168,197,218,.22);
+      color:var(--calc-accent,var(--primary));
+      font-size:19px;
+    }
+    .calc-btn.eq {
+      background:var(--calc-accent,var(--primary));
+      color:#fff;font-size:19px;
+    }
+    .calc-btn.fn  { background:var(--surface2);color:var(--on-surface-dim);font-size:13.5px; }
+    .calc-btn.wide { grid-column:span 2; }
+    [data-theme="dark"] .calc-btn.op { background:rgba(123,167,188,.18); }
   </style>
 </head>
 <body>
-
+<div class="main-row">
+<div class="left-col">
   <!-- ── Top bar ── -->
   <div class="topbar">
     <span class="app-title">
@@ -638,6 +797,160 @@
   <!-- ── Strip ── -->
   <div class="strip-label" id="stripLabel"></div>
   <div class="strip"       id="strip"></div>
+</div><!-- /left-col -->
+
+<div class="right-col">
+
+  <!-- ── Clock widget ── -->
+  <div class="widget-card" id="clockCard">
+    <div class="widget-inner">
+      <div class="widget-header">
+        <span class="widget-title">Clock</span>
+        <div style="position:relative">
+          <button class="widget-cog" id="clockCogBtn" aria-label="Clock settings">
+            <span class="material-icons-round" style="font-size:18px">settings</span>
+          </button>
+          <div class="widget-panel" id="clockPanel">
+            <div class="settings-header">
+              <span class="settings-title" style="font-size:13px">Clock Settings</span>
+              <button class="settings-close" id="clockPanelClose">
+                <span class="material-icons-round" style="font-size:16px">close</span>
+              </button>
+            </div>
+            <div class="settings-section">
+              <div class="section-label">Timezone</div>
+              <select class="tz-select" id="tzSelect">
+                <option value="America/New_York">Eastern (ET) — New York / Toronto</option>
+                <option value="America/Chicago">Central (CT) — Chicago / Winnipeg</option>
+                <option value="America/Denver">Mountain (MT) — Denver / Calgary</option>
+                <option value="America/Los_Angeles">Pacific (PT) — LA / Vancouver</option>
+                <option value="America/Halifax">Atlantic (AT) — Halifax</option>
+                <option value="America/St_Johns">Newfoundland (NT) — St. John's</option>
+                <option value="America/Anchorage">Alaska (AKT) — Anchorage</option>
+                <option value="Pacific/Honolulu">Hawaii (HST) — Honolulu</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+            <hr class="settings-divider"/>
+            <div class="settings-section">
+              <div class="section-label">Clock Font</div>
+              <div class="wfont-options" id="clockFontOptions">
+                <button class="wfont-btn active" data-font="'Google Sans','Roboto',sans-serif" style="font-family:'Google Sans','Roboto',sans-serif">Google Sans <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Michroma',sans-serif" style="font-family:'Michroma',sans-serif">Michroma <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Calibri','Gill Sans',sans-serif" style="font-family:'Calibri','Gill Sans',sans-serif">Calibri <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Cambria','Georgia',serif" style="font-family:'Cambria','Georgia',serif">Cambria <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Segoe Script','Brush Script MT',cursive" style="font-family:'Segoe Script','Brush Script MT',cursive">Segoe Script <span class="material-icons-round wcheck">check</span></button>
+              </div>
+            </div>
+            <hr class="settings-divider"/>
+            <div class="settings-section">
+              <div class="section-label">Clock Colour</div>
+              <div class="wcolor-row">
+                <div class="wcolor-wheel" title="Pick colour">
+                  <div class="wcolor-center"></div>
+                  <input type="color" id="clockColorInput" value="#A8C5DA" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;border-radius:50%"/>
+                </div>
+                <div class="wcolor-swatch" id="clockColorSwatch"></div>
+                <span class="color-hint" style="font-size:11px">Tap wheel<br>to pick</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="clock-display" id="clockDisplay">
+        <div class="clock-time">
+          <span class="clock-hm"  id="clockHM">12:00</span>
+          <span class="clock-sec" id="clockSec">:00</span>
+          <span class="clock-ampm" id="clockAmPm">AM</span>
+        </div>
+        <div class="clock-date-line" id="clockDateLine">Saturday, March 21</div>
+        <div class="clock-tz-line"   id="clockTzLine">Eastern (ET)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Calculator widget ── -->
+  <div class="widget-card" id="calcCard">
+    <div class="widget-inner">
+      <div class="widget-header">
+        <span class="widget-title">Calculator</span>
+        <div style="position:relative">
+          <button class="widget-cog" id="calcCogBtn" aria-label="Calculator settings">
+            <span class="material-icons-round" style="font-size:18px">settings</span>
+          </button>
+          <div class="widget-panel" id="calcPanel">
+            <div class="settings-header">
+              <span class="settings-title" style="font-size:13px">Calculator Settings</span>
+              <button class="settings-close" id="calcPanelClose">
+                <span class="material-icons-round" style="font-size:16px">close</span>
+              </button>
+            </div>
+            <div class="settings-section">
+              <button class="widget-action-btn" id="clearHistoryBtn">
+                <span class="material-icons-round" style="font-size:15px">delete_sweep</span>
+                Clear History
+              </button>
+            </div>
+            <hr class="settings-divider"/>
+            <div class="settings-section">
+              <div class="section-label">Calculator Font</div>
+              <div class="wfont-options" id="calcFontOptions">
+                <button class="wfont-btn active" data-font="'Google Sans','Roboto',sans-serif" style="font-family:'Google Sans','Roboto',sans-serif">Google Sans <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Michroma',sans-serif" style="font-family:'Michroma',sans-serif">Michroma <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Calibri','Gill Sans',sans-serif" style="font-family:'Calibri','Gill Sans',sans-serif">Calibri <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Cambria','Georgia',serif" style="font-family:'Cambria','Georgia',serif">Cambria <span class="material-icons-round wcheck">check</span></button>
+                <button class="wfont-btn" data-font="'Segoe Script','Brush Script MT',cursive" style="font-family:'Segoe Script','Brush Script MT',cursive">Segoe Script <span class="material-icons-round wcheck">check</span></button>
+              </div>
+            </div>
+            <hr class="settings-divider"/>
+            <div class="settings-section">
+              <div class="section-label">Calculator Colour</div>
+              <div class="wcolor-row">
+                <div class="wcolor-wheel" title="Pick colour">
+                  <div class="wcolor-center"></div>
+                  <input type="color" id="calcColorInput" value="#A8C5DA" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;border-radius:50%"/>
+                </div>
+                <div class="wcolor-swatch" id="calcColorSwatch"></div>
+                <span class="color-hint" style="font-size:11px">Tap wheel<br>to pick</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- History -->
+    <div class="calc-history" id="calcHistory"></div>
+    <!-- Display -->
+    <div class="calc-display-wrap">
+      <div class="calc-expr"    id="calcExpr"></div>
+      <div class="calc-display" id="calcDisplay">0</div>
+    </div>
+    <!-- Button grid -->
+    <div class="calc-grid" id="calcGrid">
+      <button class="calc-btn fn"   data-action="clear">AC</button>
+      <button class="calc-btn fn"   data-action="sign">±</button>
+      <button class="calc-btn fn"   data-action="pct">%</button>
+      <button class="calc-btn op"   data-action="op" data-op="÷">÷</button>
+      <button class="calc-btn"      data-action="digit" data-digit="7">7</button>
+      <button class="calc-btn"      data-action="digit" data-digit="8">8</button>
+      <button class="calc-btn"      data-action="digit" data-digit="9">9</button>
+      <button class="calc-btn op"   data-action="op" data-op="×">×</button>
+      <button class="calc-btn"      data-action="digit" data-digit="4">4</button>
+      <button class="calc-btn"      data-action="digit" data-digit="5">5</button>
+      <button class="calc-btn"      data-action="digit" data-digit="6">6</button>
+      <button class="calc-btn op"   data-action="op" data-op="−">−</button>
+      <button class="calc-btn"      data-action="digit" data-digit="1">1</button>
+      <button class="calc-btn"      data-action="digit" data-digit="2">2</button>
+      <button class="calc-btn"      data-action="digit" data-digit="3">3</button>
+      <button class="calc-btn op"   data-action="op" data-op="+">+</button>
+      <button class="calc-btn wide" data-action="digit" data-digit="0">0</button>
+      <button class="calc-btn"      data-action="dot">.</button>
+      <button class="calc-btn eq"   data-action="eq">=</button>
+    </div>
+  </div>
+
+</div><!-- /right-col -->
+</div><!-- /main-row -->
 
   <script>
     /* ═══════════════════════════════════════════════════════════
@@ -921,7 +1234,7 @@
     document.getElementById('settingsClose').addEventListener('click',()=>settingsPanel.classList.remove('open'));
     document.addEventListener('click',e=>{ if(!settingsPanel.contains(e.target)&&e.target!==settingsBtn) settingsPanel.classList.remove('open'); });
     settingsPanel.addEventListener('click',e=>e.stopPropagation());
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ settingsPanel.classList.remove('open'); closeAllPickers(); }});
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ settingsPanel.classList.remove('open'); closeAllPickers(); closeAllWidgetPanels(); }});
 
     /* ═══════════════════════════════════════════════════════════
        FONT SELECTION
@@ -1110,6 +1423,211 @@
     ══════════════════════════════════════════════════════════════ */
     render();
     renderEvents();
+
+    /* ═══════════════════════════════════════════════════════════
+       WIDGET PANEL HELPERS
+    ══════════════════════════════════════════════════════════════ */
+    function closeAllWidgetPanels() {
+      document.querySelectorAll('.widget-panel').forEach(p => p.classList.remove('open'));
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.widget-card')) closeAllWidgetPanels();
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       CLOCK
+    ══════════════════════════════════════════════════════════════ */
+    let clockTz = 'America/New_York';
+    const TZ_NAMES = {
+      'America/New_York':    'Eastern (ET)',
+      'America/Chicago':     'Central (CT)',
+      'America/Denver':      'Mountain (MT)',
+      'America/Los_Angeles': 'Pacific (PT)',
+      'America/Halifax':     'Atlantic (AT)',
+      'America/St_Johns':    'Newfoundland (NT)',
+      'America/Anchorage':   'Alaska (AKT)',
+      'Pacific/Honolulu':    'Hawaii (HST)',
+      'UTC':                 'UTC',
+    };
+
+    function tickClock() {
+      const now = new Date();
+      try {
+        const parts12  = new Intl.DateTimeFormat('en-US', { timeZone: clockTz, hour:'numeric', minute:'2-digit', hour12:true }).formatToParts(now);
+        const partsSec = new Intl.DateTimeFormat('en-US', { timeZone: clockTz, second:'2-digit' }).formatToParts(now);
+        const fmtDate  = new Intl.DateTimeFormat('en-US', { timeZone: clockTz, weekday:'long', month:'long', day:'numeric' });
+
+        const hm   = parts12.filter(p=>p.type==='hour'||p.type==='minute'||(p.type==='literal'&&p.value===':')).map(p=>p.value).join('');
+        const ampm = (parts12.find(p=>p.type==='dayPeriod')?.value||'');
+        const sec  = ':' + (partsSec.find(p=>p.type==='second')?.value||'00').padStart(2,'0');
+
+        document.getElementById('clockHM').textContent    = hm;
+        document.getElementById('clockSec').textContent   = sec;
+        document.getElementById('clockAmPm').textContent  = ampm;
+        document.getElementById('clockDateLine').textContent = fmtDate.format(now);
+        document.getElementById('clockTzLine').textContent  = TZ_NAMES[clockTz] || clockTz;
+      } catch(err) {
+        document.getElementById('clockHM').textContent = '--:--';
+      }
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // Clock cog panel
+    const clockCogBtn = document.getElementById('clockCogBtn');
+    const clockPanel  = document.getElementById('clockPanel');
+    clockCogBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const opening = !clockPanel.classList.contains('open');
+      closeAllWidgetPanels();
+      if (opening) clockPanel.classList.add('open');
+    });
+    document.getElementById('clockPanelClose').addEventListener('click', () => clockPanel.classList.remove('open'));
+    clockPanel.addEventListener('click', e => e.stopPropagation());
+
+    // Timezone
+    document.getElementById('tzSelect').addEventListener('change', e => { clockTz = e.target.value; tickClock(); });
+
+    // Clock font (scoped to clock display only)
+    document.getElementById('clockFontOptions').addEventListener('click', e => {
+      const btn = e.target.closest('.wfont-btn'); if (!btn) return;
+      document.querySelectorAll('#clockFontOptions .wfont-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('clockDisplay').style.fontFamily = btn.dataset.font;
+    });
+
+    // Clock colour
+    const clockColorInput  = document.getElementById('clockColorInput');
+    const clockColorSwatch = document.getElementById('clockColorSwatch');
+    clockColorSwatch.style.background = clockColorInput.value;
+    clockColorInput.addEventListener('input', () => {
+      document.getElementById('clockCard').style.setProperty('--clock-accent', clockColorInput.value);
+      clockColorSwatch.style.background = clockColorInput.value;
+    });
+
+    /* ═══════════════════════════════════════════════════════════
+       CALCULATOR
+    ══════════════════════════════════════════════════════════════ */
+    let calcCurr = '0', calcOp = null, calcPrev = null, calcNewNum = false;
+    const calcHistoryLog = [];
+
+    function calcRefresh() {
+      document.getElementById('calcDisplay').textContent = calcCurr;
+      document.getElementById('calcExpr').textContent = (calcOp && calcPrev !== null)
+        ? `${calcPrev} ${calcOp}` : '';
+    }
+
+    function calcPushHistory(expr) {
+      calcHistoryLog.push(expr);
+      const el = document.getElementById('calcHistory');
+      el.innerHTML = calcHistoryLog.slice(-10).map(h => `<div>${h}</div>`).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function calcPress(action, val) {
+      switch (action) {
+        case 'digit':
+          if (calcNewNum) { calcCurr = val; calcNewNum = false; }
+          else calcCurr = calcCurr === '0' ? val : calcCurr.length < 15 ? calcCurr + val : calcCurr;
+          break;
+        case 'dot':
+          if (calcNewNum) { calcCurr = '0.'; calcNewNum = false; }
+          else if (!calcCurr.includes('.')) calcCurr += '.';
+          break;
+        case 'op':
+          if (calcOp && !calcNewNum) calcPress('eq', null);
+          calcPrev   = parseFloat(calcCurr);
+          calcOp     = val;
+          calcNewNum = true;
+          break;
+        case 'eq': {
+          if (calcOp === null || calcPrev === null) break;
+          const a = calcPrev, b = parseFloat(calcCurr);
+          let res;
+          if (calcOp === '+') res = a + b;
+          if (calcOp === '−') res = a - b;
+          if (calcOp === '×') res = a * b;
+          if (calcOp === '÷') res = b !== 0 ? a / b : 'Error';
+          const expr = `${a} ${calcOp} ${b} = ${res}`;
+          calcPushHistory(expr);
+          calcCurr   = res === 'Error' ? 'Error' : String(parseFloat(Number(res).toFixed(10)));
+          calcOp     = null; calcPrev = null; calcNewNum = true;
+          break;
+        }
+        case 'clear':
+          calcCurr = '0'; calcOp = null; calcPrev = null; calcNewNum = false;
+          document.getElementById('calcExpr').textContent = '';
+          break;
+        case 'sign':
+          if (calcCurr !== '0' && calcCurr !== 'Error')
+            calcCurr = calcCurr.startsWith('-') ? calcCurr.slice(1) : '-' + calcCurr;
+          break;
+        case 'pct':
+          if (!isNaN(calcCurr)) calcCurr = String(parseFloat(calcCurr) / 100);
+          break;
+        case 'backspace':
+          if (calcCurr.length > 1) calcCurr = calcCurr.slice(0, -1);
+          else calcCurr = '0';
+          break;
+      }
+      calcRefresh();
+    }
+
+    document.getElementById('calcGrid').addEventListener('click', e => {
+      const btn = e.target.closest('.calc-btn'); if (!btn) return;
+      calcPress(btn.dataset.action, btn.dataset.op || btn.dataset.digit || null);
+    });
+
+    // Keyboard support (only when not typing in calendar input)
+    document.addEventListener('keydown', e => {
+      if (document.activeElement === document.getElementById('eventInput')) return;
+      if (/^[0-9]$/.test(e.key)) calcPress('digit', e.key);
+      else if (e.key === '.')  calcPress('dot',  null);
+      else if (e.key === '+')  calcPress('op',   '+');
+      else if (e.key === '-')  calcPress('op',   '−');
+      else if (e.key === '*')  calcPress('op',   '×');
+      else if (e.key === '/') { e.preventDefault(); calcPress('op', '÷'); }
+      else if (e.key === 'Enter' || e.key === '=') calcPress('eq', null);
+      else if (e.key === 'Backspace') calcPress('backspace', null);
+      else if (e.key === 'Delete')    calcPress('clear', null);
+    });
+
+    // Calc cog panel
+    const calcCogBtn = document.getElementById('calcCogBtn');
+    const calcPanel  = document.getElementById('calcPanel');
+    calcCogBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const opening = !calcPanel.classList.contains('open');
+      closeAllWidgetPanels();
+      if (opening) calcPanel.classList.add('open');
+    });
+    document.getElementById('calcPanelClose').addEventListener('click', () => calcPanel.classList.remove('open'));
+    calcPanel.addEventListener('click', e => e.stopPropagation());
+
+    // Clear history
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      calcHistoryLog.length = 0;
+      document.getElementById('calcHistory').innerHTML = '';
+    });
+
+    // Calc font (scoped to calc card)
+    document.getElementById('calcFontOptions').addEventListener('click', e => {
+      const btn = e.target.closest('.wfont-btn'); if (!btn) return;
+      document.querySelectorAll('#calcFontOptions .wfont-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('calcCard').style.fontFamily = btn.dataset.font;
+    });
+
+    // Calc colour
+    const calcColorInput  = document.getElementById('calcColorInput');
+    const calcColorSwatch = document.getElementById('calcColorSwatch');
+    calcColorSwatch.style.background = calcColorInput.value;
+    calcColorInput.addEventListener('input', () => {
+      document.getElementById('calcCard').style.setProperty('--calc-accent', calcColorInput.value);
+      calcColorSwatch.style.background = calcColorInput.value;
+    });
+
+    calcRefresh();
   </script>
 </body>
 </html>
