@@ -1252,7 +1252,7 @@
     ══════════════════════════════════════════════════════════════ */
     const accentInput=document.getElementById('accentColorInput');
     const colorSwatch=document.getElementById('colorSwatchLarge');
-    const calScope = document.querySelector('.left-col');
+    const calScope = document.querySelector('.card');
     function applyAccent(hex){
       calScope.style.setProperty('--primary',hex);
       calScope.style.setProperty('--primary-dark',darken(hex,.15));
