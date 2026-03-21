@@ -14,6 +14,7 @@
       --primary:        #A8C5DA;
       --primary-dark:   #7BA7BC;
       --secondary:      #C3B1E1;
+      --holiday:        #F0B429;
       --bg:             #F9F6FF;
       --surface:        #FFFFFF;
       --surface2:       #EDE9F8;
@@ -29,6 +30,7 @@
       --primary:        #7BA7BC;
       --primary-dark:   #5C8EA3;
       --secondary:      #9D8EC4;
+      --holiday:        #E6A817;
       --bg:             #1E1B2E;
       --surface:        #2A2640;
       --surface2:       #332F50;
@@ -54,75 +56,55 @@
       background-position: center;
       background-attachment: fixed;
       transition: background-color var(--transition), color var(--transition);
-      overflow-y: scroll; /* prevents layout shift from scrollbar appearing */
+      overflow-y: scroll;
     }
 
-    /* ── Background image overlay ─────────────────────────────── */
+    /* ── Background overlay ──────────────────────────────────── */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      transition: background var(--transition);
+      content: ''; position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; transition: background var(--transition);
     }
-    body.has-bg::before { background: rgba(249,246,255,0.55); }
-    [data-theme="dark"] body.has-bg::before { background: rgba(30,27,46,0.65); }
+    body.has-bg::before                    { background: rgba(249,246,255,.55); }
+    [data-theme="dark"] body.has-bg::before{ background: rgba(30,27,46,.65);    }
 
     body > * { position: relative; z-index: 1; }
-    .topbar   { z-index: 100; }   /* must exceed .card so settings panel clears it */
+    .topbar   { z-index: 200; }
 
     body.has-bg .card {
-      background: rgba(255,255,255,0.76);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     [data-theme="dark"] body.has-bg .card {
-      background: rgba(42,38,64,0.76);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(42,38,64,.76);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     body.has-bg .settings-panel {
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(255,255,255,.9);
     }
-    [data-theme="dark"] body.has-bg .settings-panel {
-      background: rgba(42,38,64,0.88);
-    }
+    [data-theme="dark"] body.has-bg .settings-panel { background: rgba(42,38,64,.9); }
 
     /* ── Top bar ─────────────────────────────────────────────── */
     .topbar {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      width: 100%; max-width: 480px;
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 20px;
     }
     .app-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--primary);
-      letter-spacing: -.3px;
+      font-size: 22px; font-weight: 600;
+      color: var(--primary); letter-spacing: -.3px;
+      display: flex; align-items: center; gap: 6px;
     }
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
 
     /* ── Icon button ─────────────────────────────────────────── */
     .icon-btn {
-      background: var(--surface);
-      border: none;
+      background: var(--surface); border: none;
       border-radius: var(--radius-sm);
       width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      color: var(--on-surface);
-      flex-shrink: 0;
+      cursor: pointer; box-shadow: var(--shadow);
+      color: var(--on-surface); flex-shrink: 0;
       transition: background var(--transition), transform .1s;
     }
     .icon-btn:hover  { background: var(--surface2); }
@@ -132,485 +114,348 @@
     .settings-wrap { position: relative; }
 
     .settings-panel {
-      position: absolute;
-      top: calc(100% + 12px);
-      right: 0;
-      width: 296px;
-      background: var(--surface);
-      border-radius: 20px;
-      box-shadow: 0 8px 36px rgba(0,0,0,.18);
-      padding: 20px;
-      z-index: 500;
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-      pointer-events: none;
-      transform-origin: top right;
+      position: absolute; top: calc(100% + 12px); right: 0;
+      width: 300px; background: var(--surface);
+      border-radius: 20px; box-shadow: 0 8px 36px rgba(0,0,0,.18);
+      padding: 20px; z-index: 500;
+      opacity: 0; transform: translateY(-10px) scale(.95);
+      pointer-events: none; transform-origin: top right;
       transition: opacity .22s cubic-bezier(.4,0,.2,1),
                   transform .22s cubic-bezier(.4,0,.2,1);
+      max-height: 85vh; overflow-y: auto; scrollbar-width: thin;
     }
-    .settings-panel.open {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: all;
-    }
+    .settings-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 
-    .settings-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-    .settings-title {
-      font-size: 15px;
-      font-weight: 600;
-    }
-    .settings-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--on-surface-dim);
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+    .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .settings-title  { font-size: 15px; font-weight: 600; }
+    .settings-close  {
+      background: none; border: none; cursor: pointer;
+      color: var(--on-surface-dim); width: 28px; height: 28px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
       transition: background .15s, color .15s;
     }
     .settings-close:hover { background: var(--surface2); color: var(--on-surface); }
 
     .settings-section { margin-bottom: 20px; }
     .settings-section:last-child { margin-bottom: 0; }
-
     .section-label {
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--on-surface-dim);
-      margin-bottom: 10px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--on-surface-dim); margin-bottom: 10px;
     }
-
-    /* Divider between sections */
-    .settings-divider {
-      border: none;
-      border-top: 1px solid var(--surface2);
-      margin: 16px 0;
-    }
+    .settings-divider { border: none; border-top: 1px solid var(--surface2); margin: 16px 0; }
 
     /* ── Font options ─────────────────────────────────────────── */
     .font-options { display: flex; flex-direction: column; gap: 5px; }
-
     .font-btn {
-      background: transparent;
-      border: 1.5px solid var(--surface2);
-      border-radius: 10px;
-      padding: 9px 13px;
-      cursor: pointer;
-      text-align: left;
-      font-size: 13.5px;
-      color: var(--on-surface);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: transparent; border: 1.5px solid var(--surface2);
+      border-radius: 10px; padding: 9px 13px; cursor: pointer;
+      text-align: left; font-size: 13.5px; color: var(--on-surface);
+      display: flex; align-items: center; justify-content: space-between;
       transition: border-color .15s, background .15s;
     }
     .font-btn:hover  { border-color: var(--primary); background: var(--surface2); }
     .font-btn.active { border-color: var(--primary); background: var(--surface2); }
-    .font-btn .check {
-      font-size: 16px;
-      color: var(--primary);
-      opacity: 0;
-      transition: opacity .15s;
-    }
+    .font-btn .check { font-size: 16px; color: var(--primary); opacity: 0; transition: opacity .15s; }
     .font-btn.active .check { opacity: 1; }
 
-    /* ── Accent color ─────────────────────────────────────────── */
-    .color-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    /* ── Accent colour ────────────────────────────────────────── */
+    .color-row { display: flex; align-items: center; gap: 12px; }
     .color-wheel-wrap {
-      width: 46px; height: 46px;
-      border-radius: 50%;
+      width: 46px; height: 46px; border-radius: 50%;
       background: conic-gradient(
-        hsl(0,85%,65%) 0deg,
-        hsl(30,85%,65%) 40deg,
-        hsl(60,85%,65%) 80deg,
-        hsl(120,75%,60%) 130deg,
-        hsl(180,75%,55%) 180deg,
-        hsl(210,75%,60%) 210deg,
-        hsl(240,75%,65%) 240deg,
-        hsl(280,75%,65%) 280deg,
-        hsl(320,80%,65%) 320deg,
-        hsl(360,85%,65%) 360deg
+        hsl(0,85%,65%) 0deg, hsl(30,85%,65%) 40deg,
+        hsl(60,85%,65%) 80deg, hsl(120,75%,60%) 130deg,
+        hsl(180,75%,55%) 180deg, hsl(210,75%,60%) 210deg,
+        hsl(240,75%,65%) 240deg, hsl(280,75%,65%) 280deg,
+        hsl(320,80%,65%) 320deg, hsl(360,85%,65%) 360deg
       );
-      padding: 3px;
-      cursor: pointer;
-      position: relative;
-      flex-shrink: 0;
-      transition: transform .15s;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      padding: 3px; cursor: pointer; position: relative; flex-shrink: 0;
+      transition: transform .15s; box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
     .color-wheel-wrap:hover { transform: scale(1.1); }
-    .color-wheel-center {
-      width: 100%; height: 100%;
-      border-radius: 50%;
-      background: var(--surface);
-      pointer-events: none;
-    }
+    .color-wheel-center { width: 100%; height: 100%; border-radius: 50%; background: var(--surface); pointer-events: none; }
     #accentColorInput {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      border: none;
-      padding: 0;
-      border-radius: 50%;
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: none; padding: 0; border-radius: 50%;
     }
     .color-swatch-large {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 3px solid var(--surface2);
-      flex-shrink: 0;
-      transition: background .2s;
+      width: 34px; height: 34px; border-radius: 50%; background: var(--primary);
+      border: 3px solid var(--surface2); flex-shrink: 0; transition: background .2s;
     }
     .color-hint { font-size: 12px; color: var(--on-surface-dim); line-height: 1.3; }
 
     /* ── Background upload ────────────────────────────────────── */
-    .bg-controls {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
+    .bg-controls { display: flex; gap: 8px; align-items: stretch; }
 
     .bg-upload-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      background: var(--surface2);
-      border: none;
-      border-radius: 10px;
-      padding: 10px 13px;
-      font-size: 11.5px;
-      color: var(--on-surface);
-      cursor: pointer;
-      text-align: center;
-      flex: 1;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 4px; background: var(--surface2);
+      border: none; border-radius: 10px; padding: 10px 13px;
+      font-size: 11.5px; color: var(--on-surface); cursor: pointer;
+      text-align: center; flex: 1;
       transition: background .15s, color .15s;
     }
     .bg-upload-label:hover { background: var(--primary); color: #fff; }
     #bgInput { display: none; }
 
     .drop-zone {
-      flex: 1;
-      border: 2px dashed var(--surface2);
-      border-radius: 10px;
-      padding: 10px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-size: 11.5px;
-      color: var(--on-surface-dim);
-      text-align: center;
-      cursor: default;
+      flex: 1; border: 2px dashed var(--surface2); border-radius: 10px;
+      padding: 10px 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      font-size: 11.5px; color: var(--on-surface-dim);
+      text-align: center; cursor: default;
       transition: border-color .15s, background .15s, color .15s;
     }
     .drop-zone.drag-over {
-      border-color: var(--primary);
-      border-style: solid;
-      background: var(--surface2);
-      color: var(--on-surface);
+      border-color: var(--primary); border-style: solid;
+      background: var(--surface2); color: var(--on-surface);
     }
 
     #removeBgBtn {
-      display: none;
-      align-items: center;
-      gap: 5px;
-      background: transparent;
-      border: 1.5px solid var(--surface2);
-      border-radius: 10px;
-      padding: 7px 11px;
-      font-size: 13px;
-      color: var(--on-surface-dim);
-      cursor: pointer;
-      margin-top: 8px;
-      width: 100%;
-      justify-content: center;
-      transition: border-color .15s, color .15s;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      background: transparent; border: 1.5px solid var(--surface2);
+      border-radius: 10px; padding: 8px 11px; font-size: 13px;
+      color: var(--on-surface-dim); cursor: pointer; width: 100%; margin-top: 8px;
+      opacity: .4; pointer-events: none;
+      transition: border-color .15s, color .15s, opacity .2s;
     }
-    #removeBgBtn:hover { border-color: #F4A9A8; color: #C0605F; }
-    #removeBgBtn.visible { display: flex; }
+    #removeBgBtn.active { opacity: 1; pointer-events: all; }
+    #removeBgBtn.active:hover { border-color: #F4A9A8; color: #C0605F; }
 
-    /* ── Michroma font optimisations ─────────────────────────── */
-    body.font-michroma .app-title         { font-size: 17px; letter-spacing: -0.04em; }
-    body.font-michroma .month-label       { font-size: 15px; letter-spacing: -0.04em; }
-    body.font-michroma .dow-cell          { font-size: 10px; letter-spacing: -0.03em; }
-    body.font-michroma .day-btn           { font-size: 11.5px; letter-spacing: -0.02em; }
-    body.font-michroma .event-panel-title { font-size: 11px;  letter-spacing: -0.02em; }
-    body.font-michroma .event-item        { font-size: 12px;  letter-spacing: -0.02em; }
-    body.font-michroma .add-input         { font-size: 12px;  letter-spacing: -0.01em; }
-    body.font-michroma .strip-label       { font-size: 10px;  letter-spacing: -0.03em; }
-    body.font-michroma .strip-dow         { font-size: 9px;   letter-spacing:  0;      }
-    body.font-michroma .strip-num         { font-size: 10.5px;letter-spacing: -0.02em; }
+    /* ── Michroma optimisations ──────────────────────────────── */
+    body.font-michroma .app-title         { font-size: 17px; letter-spacing: -.04em; }
+    body.font-michroma .month-label-btn,
+    body.font-michroma .year-label-btn    { font-size: 14px; letter-spacing: -.04em; }
+    body.font-michroma .dow-cell          { font-size: 10px; letter-spacing: -.03em; }
+    body.font-michroma .day-btn           { font-size: 11.5px; letter-spacing: -.02em; }
+    body.font-michroma .event-panel-title { font-size: 11px;   letter-spacing: -.02em; }
+    body.font-michroma .event-item        { font-size: 12px;   letter-spacing: -.02em; }
+    body.font-michroma .add-input         { font-size: 12px;   letter-spacing: -.01em; }
+    body.font-michroma .strip-label       { font-size: 10px;   letter-spacing: -.03em; }
+    body.font-michroma .strip-dow         { font-size: 9px;    letter-spacing:  0;     }
+    body.font-michroma .strip-num         { font-size: 10.5px; letter-spacing: -.02em; }
 
     /* ── Card ────────────────────────────────────────────────── */
     .card {
-      background: var(--surface);
-      border-radius: var(--radius-card);
-      box-shadow: var(--shadow);
-      padding: 28px 24px 24px;
-      width: 100%;
-      max-width: 480px;
+      background: var(--surface); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); padding: 28px 24px 24px;
+      width: 100%; max-width: 480px;
       transition: background var(--transition), box-shadow var(--transition);
+      overflow: visible;
     }
 
     /* ── Month nav ───────────────────────────────────────────── */
     .month-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; position: relative; z-index: 50;
     }
-    .month-label { font-size: 18px; font-weight: 600; letter-spacing: -.2px; }
+    .month-label-wrap {
+      display: flex; align-items: center; gap: 2px;
+      position: relative;
+    }
+    .month-label-btn, .year-label-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; font-weight: 600; letter-spacing: -.2px;
+      color: var(--on-surface); padding: 5px 8px; border-radius: 10px;
+      transition: background .15s;
+    }
+    .month-label-btn:hover, .year-label-btn:hover { background: var(--surface2); }
+    .month-label-btn:focus, .year-label-btn:focus { outline: none; }
+
+    /* ── Picker popups (month & year) ────────────────────────── */
+    .picker-popup {
+      position: absolute; top: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%) translateY(-8px) scale(.95);
+      background: var(--surface); border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.16);
+      padding: 16px; z-index: 300; min-width: 260px;
+      opacity: 0; pointer-events: none; transform-origin: top center;
+      transition: opacity .2s cubic-bezier(.4,0,.2,1),
+                  transform .2s cubic-bezier(.4,0,.2,1);
+    }
+    .picker-popup.open {
+      opacity: 1; pointer-events: all;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    .picker-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    }
+    .picker-cell {
+      padding: 9px 4px; border: none; border-radius: 10px;
+      background: var(--surface2); color: var(--on-surface);
+      cursor: pointer; font-size: 13px; font-weight: 500; text-align: center;
+      transition: background .15s, color .15s;
+    }
+    .picker-cell:hover  { background: var(--primary); color: #fff; }
+    .picker-cell.active { background: var(--primary); color: #fff; }
+
+    .year-popup-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .year-nav-btn {
+      background: var(--surface2); border: none; border-radius: 8px;
+      width: 30px; height: 30px; cursor: pointer; color: var(--on-surface);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .year-nav-btn:hover { background: var(--primary); color: #fff; }
+    .year-range-label { font-size: 13px; font-weight: 600; color: var(--on-surface-dim); }
 
     /* ── DOW header ──────────────────────────────────────────── */
-    .dow-row {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      margin-bottom: 6px;
-    }
+    .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 6px; }
     .dow-cell {
-      text-align: center;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--on-surface-dim);
-      padding: 4px 0;
+      text-align: center; font-size: 12px; font-weight: 500;
+      color: var(--on-surface-dim); padding: 4px 0;
     }
 
     /* ── Day grid ────────────────────────────────────────────── */
-    .day-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-    }
-    .day-cell {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .day-cell  { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+
     .day-btn {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      color: var(--on-surface);
-      font-size: 14px;
-      font-weight: 400;
-      cursor: pointer;
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: transparent; color: var(--on-surface);
+      font-size: 14px; font-weight: 400; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: background .15s, color .15s, transform .1s;
-      position: relative;
-      -webkit-tap-highlight-color: transparent;
+      position: relative; -webkit-tap-highlight-color: transparent;
     }
     .day-btn:hover  { background: var(--surface2); }
     .day-btn:active { transform: scale(.88); }
     .day-btn:focus  { outline: none; }
     .day-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-    .day-btn.today {
-      background: var(--primary);
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
-    }
-    .day-btn.selected:not(.today) {
-      background: var(--secondary);
-      color: #fff;
-      font-weight: 600;
-    }
+    .day-btn.today    { background: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .day-btn.selected:not(.today) { background: var(--secondary); color: #fff; font-weight: 600; }
+
+    /* Event dot (bottom) */
     .day-btn.has-event::after {
-      content: '';
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: var(--secondary);
+      content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--secondary);
     }
-    .day-btn.today.has-event::after  { background: rgba(255,255,255,.75); }
+    .day-btn.today.has-event::after,
     .day-btn.selected.has-event::after { background: rgba(255,255,255,.75); }
+
+    /* Holiday dot (top) */
+    .day-btn.holiday::before {
+      content: ''; position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--holiday);
+    }
+    .day-btn.today.holiday::before,
+    .day-btn.selected.holiday::before  { background: rgba(255,255,255,.85); }
 
     /* ── Event panel ─────────────────────────────────────────── */
     .event-panel {
-      margin-top: 16px;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      min-height: 54px;
+      margin-top: 16px; background: var(--surface2);
+      border-radius: var(--radius-sm); padding: 14px 16px; min-height: 54px;
       transition: background var(--transition);
     }
     .event-panel-title {
-      font-size: 12.5px;
-      font-weight: 500;
-      color: var(--on-surface-dim);
-      margin-bottom: 10px;
+      font-size: 12.5px; font-weight: 500; color: var(--on-surface-dim); margin-bottom: 10px;
     }
     .event-list { display: flex; flex-direction: column; gap: 7px; }
     .event-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 9px 13px;
-      font-size: 13.5px;
-      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border-radius: 10px;
+      padding: 9px 13px; font-size: 13.5px; box-shadow: var(--shadow);
     }
-    .event-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .event-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .event-text { flex: 1; }
     .event-delete {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--on-surface-dim);
+      background: none; border: none; cursor: pointer; color: var(--on-surface-dim);
       display: flex; align-items: center; justify-content: center;
-      border-radius: 6px;
-      width: 26px; height: 26px;
-      flex-shrink: 0;
+      border-radius: 6px; width: 26px; height: 26px; flex-shrink: 0;
       transition: background .15s, color .15s;
-      font-size: 16px;
     }
     .event-delete:hover { background: #F4A9A820; color: #C0605F; }
-    .event-none {
-      font-size: 13px;
-      color: var(--on-surface-dim);
-      text-align: center;
-      padding: 4px 0;
+    .holiday-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border-radius: 10px;
+      padding: 8px 13px; font-size: 13px; box-shadow: var(--shadow);
+      border-left: 3px solid var(--holiday);
     }
+    .holiday-icon { font-size: 14px; color: var(--holiday); flex-shrink: 0; }
+    .event-none { font-size: 13px; color: var(--on-surface-dim); text-align: center; padding: 4px 0; }
 
     /* ── Add row ─────────────────────────────────────────────── */
-    .add-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      align-items: center;
-    }
+    .add-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
 
-    /* Event color swatch */
-    .event-color-pick {
-      position: relative;
-      width: 36px; height: 36px;
-      flex-shrink: 0;
-    }
+    .event-color-pick { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
     .event-color-swatch {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2.5px solid var(--surface2);
-      pointer-events: none;
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2.5px solid var(--surface2); pointer-events: none;
       transition: transform .1s, border-color .15s;
     }
     .event-color-pick:hover .event-color-swatch { transform: scale(1.1); border-color: var(--primary); }
     #eventColorInput {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      border: none;
-      padding: 0;
-      border-radius: 50%;
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: none; padding: 0; border-radius: 50%;
     }
-
     .add-input {
-      flex: 1;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      font-size: 14px;
-      background: var(--surface);
-      color: var(--on-surface);
-      box-shadow: var(--shadow);
-      outline: none;
+      flex: 1; border: none; border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 14px; background: var(--surface);
+      color: var(--on-surface); box-shadow: var(--shadow); outline: none;
       transition: box-shadow .15s;
     }
     .add-input:focus { box-shadow: 0 0 0 2px var(--primary); }
     .add-input::placeholder { color: var(--on-surface-dim); }
-
     .fab {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      width: 44px; height: 44px;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: var(--radius-sm); width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,.18);
-      flex-shrink: 0;
-      transition: background .15s, transform .1s;
+      cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.18);
+      flex-shrink: 0; transition: background .15s, transform .1s;
     }
     .fab:hover  { background: var(--primary-dark); }
     .fab:active { transform: scale(.92); }
 
     /* ── Strip ───────────────────────────────────────────────── */
     .strip-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--on-surface-dim);
-      margin: 20px 0 8px;
-      width: 100%;
-      max-width: 480px;
-      padding-left: 4px;
+      font-size: 12px; font-weight: 500; color: var(--on-surface-dim);
+      margin: 20px 0 8px; width: 100%; max-width: 480px; padding-left: 4px;
     }
     .strip {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-      max-width: 480px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-      /* no scroll-behavior here — we set scrollLeft directly */
+      display: flex; gap: 4px; width: 100%; max-width: 480px;
+      overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;
+      align-items: flex-end;
     }
     .strip::-webkit-scrollbar { display: none; }
 
-    .strip-day { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
-    .strip-dow { font-size: 11px; color: var(--on-surface-dim); font-weight: 500; }
-    .strip-num {
-      width: 30px; height: 30px;
-      border-radius: 50%;
+    .strip-day  { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+    .strip-dow  { font-size: 11px; color: var(--on-surface-dim); font-weight: 500; }
+    .strip-num  {
+      width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      color: var(--on-surface);
-      position: relative;
-      transition: background .15s;
-      -webkit-tap-highlight-color: transparent;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      color: var(--on-surface); position: relative;
+      transition: background .15s; -webkit-tap-highlight-color: transparent;
     }
-    .strip-num:hover            { background: var(--surface2); }
-    .strip-num.s-today          { background: var(--primary); color: #fff; }
+    .strip-num:hover               { background: var(--surface2); }
+    .strip-num.s-today             { background: var(--primary); color: #fff; }
     .strip-num.s-sel:not(.s-today) { background: var(--secondary); color: #fff; }
     .strip-num.s-event::after {
-      content: '';
-      position: absolute;
-      bottom: 2px; left: 50%; transform: translateX(-50%);
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--secondary);
+      content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--secondary);
     }
     .strip-num.s-today.s-event::after,
     .strip-num.s-sel.s-event::after { background: rgba(255,255,255,.75); }
+    .strip-num.s-holiday::before {
+      content: ''; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--holiday);
+    }
+    .strip-num.s-today.s-holiday::before,
+    .strip-num.s-sel.s-holiday::before { background: rgba(255,255,255,.85); }
+
+    /* Week separator in strip */
+    .strip-week-sep {
+      width: 1.5px;
+      align-self: stretch;
+      background: var(--surface2);
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin: 0 3px;
+    }
   </style>
 </head>
 <body>
@@ -618,7 +463,8 @@
   <!-- ── Top bar ── -->
   <div class="topbar">
     <span class="app-title">
-      <span class="material-icons-round" style="font-size:24px;vertical-align:middle;margin-right:6px;color:var(--primary)">local_florist</span>Calendar
+      <span class="material-icons-round" style="font-size:24px">local_florist</span>
+      Calendar
     </span>
     <div class="top-actions">
 
@@ -628,10 +474,10 @@
           <span class="material-icons-round">settings</span>
         </button>
 
-        <div class="settings-panel" id="settingsPanel" role="dialog" aria-label="Settings">
+        <div class="settings-panel" id="settingsPanel">
           <div class="settings-header">
             <span class="settings-title">Settings</span>
-            <button class="settings-close" id="settingsClose" aria-label="Close settings">
+            <button class="settings-close" id="settingsClose">
               <span class="material-icons-round" style="font-size:18px">close</span>
             </button>
           </div>
@@ -640,46 +486,31 @@
           <div class="settings-section">
             <div class="section-label">Font</div>
             <div class="font-options" id="fontOptions">
-              <button class="font-btn active"
-                data-font="'Google Sans','Roboto',sans-serif"
-                style="font-family:'Google Sans','Roboto',sans-serif">
-                Google Sans
-                <span class="material-icons-round check">check</span>
+              <button class="font-btn active" data-font="'Google Sans','Roboto',sans-serif" style="font-family:'Google Sans','Roboto',sans-serif">
+                Google Sans <span class="material-icons-round check">check</span>
               </button>
-              <button class="font-btn"
-                data-font="'Michroma',sans-serif"
-                style="font-family:'Michroma',sans-serif">
-                Michroma
-                <span class="material-icons-round check">check</span>
+              <button class="font-btn" data-font="'Michroma',sans-serif" style="font-family:'Michroma',sans-serif">
+                Michroma <span class="material-icons-round check">check</span>
               </button>
-              <button class="font-btn"
-                data-font="'Calibri','Gill Sans',sans-serif"
-                style="font-family:'Calibri','Gill Sans',sans-serif">
-                Calibri
-                <span class="material-icons-round check">check</span>
+              <button class="font-btn" data-font="'Calibri','Gill Sans',sans-serif" style="font-family:'Calibri','Gill Sans',sans-serif">
+                Calibri <span class="material-icons-round check">check</span>
               </button>
-              <button class="font-btn"
-                data-font="'Cambria','Georgia',serif"
-                style="font-family:'Cambria','Georgia',serif">
-                Cambria
-                <span class="material-icons-round check">check</span>
+              <button class="font-btn" data-font="'Cambria','Georgia',serif" style="font-family:'Cambria','Georgia',serif">
+                Cambria <span class="material-icons-round check">check</span>
               </button>
-              <button class="font-btn"
-                data-font="'Segoe Script','Brush Script MT',cursive"
-                style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15px">
-                Segoe Script
-                <span class="material-icons-round check">check</span>
+              <button class="font-btn" data-font="'Segoe Script','Brush Script MT',cursive" style="font-family:'Segoe Script','Brush Script MT',cursive;font-size:15px">
+                Segoe Script <span class="material-icons-round check">check</span>
               </button>
             </div>
           </div>
 
           <hr class="settings-divider" />
 
-          <!-- Accent color -->
+          <!-- Accent colour -->
           <div class="settings-section">
-            <div class="section-label">Accent Color</div>
+            <div class="section-label">Accent Colour</div>
             <div class="color-row">
-              <div class="color-wheel-wrap" title="Open color picker">
+              <div class="color-wheel-wrap" title="Pick colour">
                 <div class="color-wheel-center"></div>
                 <input type="color" id="accentColorInput" value="#A8C5DA" />
               </div>
@@ -725,11 +556,37 @@
       <button class="icon-btn" id="prevBtn" aria-label="Previous month">
         <span class="material-icons-round">chevron_left</span>
       </button>
-      <span class="month-label" id="monthLabel"></span>
+
+      <!-- Clickable month + year labels with pickers -->
+      <div class="month-label-wrap" id="monthLabelWrap">
+        <button class="month-label-btn" id="monthPick" aria-label="Pick month"></button>
+        <button class="year-label-btn"  id="yearPick"  aria-label="Pick year"></button>
+
+        <!-- Month picker popup -->
+        <div class="picker-popup" id="monthPopup">
+          <div class="picker-grid" id="monthGrid"></div>
+        </div>
+
+        <!-- Year picker popup -->
+        <div class="picker-popup" id="yearPopup">
+          <div class="year-popup-nav">
+            <button class="year-nav-btn" id="yearRangePrev">
+              <span class="material-icons-round" style="font-size:18px">chevron_left</span>
+            </button>
+            <span class="year-range-label" id="yearRangeLabel"></span>
+            <button class="year-nav-btn" id="yearRangeNext">
+              <span class="material-icons-round" style="font-size:18px">chevron_right</span>
+            </button>
+          </div>
+          <div class="picker-grid" id="yearGrid"></div>
+        </div>
+      </div>
+
       <button class="icon-btn" id="nextBtn" aria-label="Next month">
         <span class="material-icons-round">chevron_right</span>
       </button>
     </div>
+
     <div class="dow-row"  id="dowRow"></div>
     <div class="day-grid" id="dayGrid"></div>
 
@@ -739,7 +596,6 @@
     </div>
 
     <div class="add-row">
-      <!-- Event color pick -->
       <div class="event-color-pick" title="Pick event colour">
         <div class="event-color-swatch" id="eventColorSwatch"></div>
         <input type="color" id="eventColorInput" value="#A8C5DA" />
@@ -756,38 +612,109 @@
   <div class="strip" id="strip"></div>
 
   <script>
-    /* ── State ──────────────────────────────────────────────── */
-    const TODAY   = new Date();
-    let   current = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
-    let   selected= new Date(TODAY);
-    const events  = {};   // { 'YYYY-MM-DD': [{text, color}] }
-
+    /* ── Constants ──────────────────────────────────────────── */
+    const TODAY  = new Date();
     const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const MONTHS = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
+    const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    /* ── State ──────────────────────────────────────────────── */
+    let current  = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    let selected = new Date(TODAY);
+    const events = {};
 
     /* ── Helpers ────────────────────────────────────────────── */
-    const key     = d => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
-    const p2      = n => String(n).padStart(2,'0');
-    const isToday = d => key(d) === key(TODAY);
-    const isSel   = d => key(d) === key(selected);
+    const p2      = n  => String(n).padStart(2, '0');
+    const key     = d  => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    const isToday = d  => key(d) === key(TODAY);
+    const isSel   = d  => key(d) === key(selected);
 
     function darken(hex, amt) {
       const n = parseInt(hex.replace('#',''), 16);
-      const r = Math.round(((n >> 16) & 0xff) * (1 - amt));
-      const g = Math.round(((n >>  8) & 0xff) * (1 - amt));
-      const b = Math.round(( n        & 0xff) * (1 - amt));
+      const r = Math.round(((n>>16)&0xff)*(1-amt));
+      const g = Math.round(((n>>8 )&0xff)*(1-amt));
+      const b = Math.round(( n     &0xff)*(1-amt));
       return `#${p2(r.toString(16))}${p2(g.toString(16))}${p2(b.toString(16))}`;
+    }
+
+    /* ── Holidays ───────────────────────────────────────────── */
+    const holidayCache = {};
+
+    function calcEaster(yr) {
+      const a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4;
+      const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
+      const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
+      const l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+      const month=Math.floor((h+l-7*m+114)/31), day=((h+l-7*m+114)%31)+1;
+      return new Date(yr, month-1, day);
+    }
+
+    function nthWeekday(yr, mo, wd, n) {
+      // n>0 = nth from start, n<0 = nth from end
+      if (n > 0) {
+        const first = new Date(yr, mo-1, 1).getDay();
+        return 1 + ((wd-first+7)%7) + (n-1)*7;
+      } else {
+        const last = new Date(yr, mo, 0);
+        return last.getDate() - ((last.getDay()-wd+7)%7);
+      }
+    }
+
+    function getHolidays(yr) {
+      if (holidayCache[yr]) return holidayCache[yr];
+      const h = {};
+      const add = (mo, d, name) => {
+        const k = `${yr}-${p2(mo)}-${p2(d)}`;
+        (h[k] = h[k] || []).push(name);
+      };
+
+      // Fixed-date
+      add(1,  1,  "New Year's Day");
+      add(2,  14, "Valentine's Day");
+      add(7,  1,  "Canada Day");
+      add(7,  4,  "Independence Day");
+      add(10, 31, "Halloween");
+      add(11, 11, "Remembrance / Veterans Day");
+      add(12, 24, "Christmas Eve");
+      add(12, 25, "Christmas Day");
+      add(12, 26, "Boxing Day");
+      add(12, 31, "New Year's Eve");
+
+      // Calculated — US & Canada
+      add(1, nthWeekday(yr,1,1,3), "Martin Luther King Jr. Day");
+      add(2, nthWeekday(yr,2,1,3), "Presidents' Day / Family Day");
+      add(5, nthWeekday(yr,5,1,-1), "Memorial Day");
+      add(9, nthWeekday(yr,9,1,1),  "Labour Day");
+      add(10, nthWeekday(yr,10,1,2), "Thanksgiving (CA) · Columbus Day");
+      add(11, nthWeekday(yr,11,4,4), "Thanksgiving (US)");
+
+      // Victoria Day — last Monday on or before May 24
+      const vic = new Date(yr,4,24);
+      while (vic.getDay() !== 1) vic.setDate(vic.getDate()-1);
+      add(5, vic.getDate(), "Victoria Day");
+
+      // Easter & Good Friday
+      const easter = calcEaster(yr);
+      add(easter.getMonth()+1, easter.getDate(), "Easter Sunday");
+      const gf = new Date(easter); gf.setDate(gf.getDate()-2);
+      add(gf.getMonth()+1, gf.getDate(), "Good Friday");
+
+      holidayCache[yr] = h;
+      return h;
     }
 
     /* ── Render calendar ────────────────────────────────────── */
     function render() {
-      const year  = current.getFullYear();
-      const month = current.getMonth();
-      const start = new Date(year, month, 1).getDay();
-      const total = new Date(year, month + 1, 0).getDate();
+      const yr    = current.getFullYear();
+      const mo    = current.getMonth();
+      const start = new Date(yr, mo, 1).getDay();
+      const total = new Date(yr, mo+1, 0).getDate();
+      const hols  = getHolidays(yr);
 
-      document.getElementById('monthLabel').textContent = `${MONTHS[month]} ${year}`;
+      // Update month/year labels
+      document.getElementById('monthPick').textContent = MONTHS[mo];
+      document.getElementById('yearPick').textContent  = yr;
 
       // DOW header
       document.getElementById('dowRow').innerHTML =
@@ -797,16 +724,17 @@
       const grid = document.getElementById('dayGrid');
       grid.innerHTML = '';
 
-      for (let i = 0; i < start; i++) {
+      for (let i = 0; i < start; i++)
         grid.insertAdjacentHTML('beforeend', '<div class="day-cell"></div>');
-      }
+
       for (let d = 1; d <= total; d++) {
-        const date = new Date(year, month, d);
+        const date = new Date(yr, mo, d);
         const k    = key(date);
         const cls  = ['day-btn',
-          isToday(date) ? 'today' : '',
-          !isToday(date) && isSel(date) ? 'selected' : '',
-          events[k]?.length ? 'has-event' : ''
+          isToday(date)                    ? 'today'    : '',
+          !isToday(date) && isSel(date)    ? 'selected' : '',
+          events[k]?.length                ? 'has-event': '',
+          hols[k]?.length                  ? 'holiday'  : '',
         ].filter(Boolean).join(' ');
 
         const cell = document.createElement('div');
@@ -814,12 +742,7 @@
         const btn = document.createElement('button');
         btn.className = cls;
         btn.textContent = d;
-        btn.addEventListener('click', () => {
-          btn.blur();                     // prevent focus-triggered page scroll
-          selected = date;
-          render();
-          renderEvents();
-        });
+        btn.addEventListener('click', () => { btn.blur(); selected = date; render(); renderEvents(); });
         cell.appendChild(btn);
         grid.appendChild(cell);
       }
@@ -829,32 +752,42 @@
 
     /* ── Render events ──────────────────────────────────────── */
     function renderEvents() {
-      const k    = key(selected);
-      const list = events[k] || [];
+      const k     = key(selected);
+      const list  = events[k] || [];
+      const hols  = getHolidays(selected.getFullYear())[k] || [];
+
       document.getElementById('eventTitle').textContent =
         selected.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
 
       const el = document.getElementById('eventList');
-      if (!list.length) {
+      el.innerHTML = '';
+
+      // Holidays first
+      hols.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'holiday-item';
+        item.innerHTML = `<span class="material-icons-round holiday-icon">star</span>
+                          <span class="event-text">${name}</span>`;
+        el.appendChild(item);
+      });
+
+      // User events
+      if (!list.length && !hols.length) {
         el.innerHTML = '<div class="event-none">No events — add one below</div>';
         return;
       }
-
-      el.innerHTML = '';
       list.forEach((e, i) => {
         const item = document.createElement('div');
         item.className = 'event-item';
-        item.innerHTML =
-          `<span class="event-dot" style="background:${e.color}"></span>
-           <span class="event-text">${e.text}</span>
-           <button class="event-delete" aria-label="Delete event" title="Delete">
-             <span class="material-icons-round" style="font-size:16px">close</span>
-           </button>`;
+        item.innerHTML = `<span class="event-dot" style="background:${e.color}"></span>
+                          <span class="event-text">${e.text}</span>
+                          <button class="event-delete" title="Delete">
+                            <span class="material-icons-round" style="font-size:16px">close</span>
+                          </button>`;
         item.querySelector('.event-delete').addEventListener('click', () => {
           events[k].splice(i, 1);
           if (!events[k].length) delete events[k];
-          render();
-          renderEvents();
+          render(); renderEvents();
         });
         el.appendChild(item);
       });
@@ -865,112 +798,175 @@
       const input = document.getElementById('eventInput');
       const text  = input.value.trim();
       if (!text) return;
-      const k     = key(selected);
-      const color = document.getElementById('eventColorInput').value;
+      const k = key(selected);
       if (!events[k]) events[k] = [];
-      events[k].push({ text, color });
+      events[k].push({ text, color: document.getElementById('eventColorInput').value });
       input.value = '';
-      render();
-      renderEvents();
+      render(); renderEvents();
     }
     document.getElementById('addBtn').addEventListener('click', addEvent);
-    document.getElementById('eventInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') addEvent();
-    });
+    document.getElementById('eventInput').addEventListener('keydown', e => { if (e.key==='Enter') addEvent(); });
 
-    // Sync event colour swatch preview
     const evColorInput  = document.getElementById('eventColorInput');
     const evColorSwatch = document.getElementById('eventColorSwatch');
     evColorSwatch.style.background = evColorInput.value;
-    evColorInput.addEventListener('input', () => {
-      evColorSwatch.style.background = evColorInput.value;
-    });
+    evColorInput.addEventListener('input', () => { evColorSwatch.style.background = evColorInput.value; });
 
     /* ── Strip ──────────────────────────────────────────────── */
     function renderStrip() {
-      const year  = current.getFullYear();
-      const month = current.getMonth();
-      const total = new Date(year, month + 1, 0).getDate();
+      const yr    = current.getFullYear();
+      const mo    = current.getMonth();
+      const total = new Date(yr, mo+1, 0).getDate();
+      const hols  = getHolidays(yr);
 
-      document.getElementById('stripLabel').textContent = `${MONTHS[month]} at a glance`;
-
+      document.getElementById('stripLabel').textContent = `${MONTHS[mo]} at a glance`;
       const strip = document.getElementById('strip');
       strip.innerHTML = '';
 
       for (let d = 1; d <= total; d++) {
-        const date = new Date(year, month, d);
+        const date = new Date(yr, mo, d);
         const k    = key(date);
+        const wd   = date.getDay();
+
+        // Week separator before each Sunday (except first day)
+        if (wd === 0 && d > 1) {
+          const sep = document.createElement('div');
+          sep.className = 'strip-week-sep';
+          strip.appendChild(sep);
+        }
 
         const wrap = document.createElement('div');
         wrap.className = 'strip-day';
 
         const dow = document.createElement('div');
         dow.className = 'strip-dow';
-        dow.textContent = DAYS[date.getDay()][0];
+        dow.textContent = DAYS[wd][0];
 
         const num = document.createElement('div');
         num.className = ['strip-num',
-          isToday(date) ? 's-today' : '',
-          !isToday(date) && isSel(date) ? 's-sel' : '',
-          events[k]?.length ? 's-event' : ''
+          isToday(date)                  ? 's-today'   : '',
+          !isToday(date) && isSel(date)  ? 's-sel'     : '',
+          events[k]?.length              ? 's-event'   : '',
+          hols[k]?.length                ? 's-holiday' : '',
         ].filter(Boolean).join(' ');
         num.textContent = d;
-        num.addEventListener('click', () => {
-          selected = date;
-          render();
-          renderEvents();
-        });
+        num.addEventListener('click', () => { selected = date; render(); renderEvents(); });
 
         wrap.appendChild(dow);
         wrap.appendChild(num);
         strip.appendChild(wrap);
       }
 
-      // Scroll strip only — never the page
-      const selYear  = selected.getFullYear();
-      const selMonth = selected.getMonth();
-      if (selYear === year && selMonth === month) {
+      // Scroll strip to selected day without scrolling the page
+      if (selected.getFullYear()===yr && selected.getMonth()===mo) {
         const idx    = selected.getDate() - 1;
         const target = strip.children[Math.max(idx - 2, 0)];
         if (target) strip.scrollLeft = target.offsetLeft - 16;
       }
     }
 
-    /* ── Month nav ──────────────────────────────────────────── */
+    /* ── Month nav buttons ──────────────────────────────────── */
     document.getElementById('prevBtn').addEventListener('click', e => {
-      e.preventDefault();
-      e.currentTarget.blur();
-      current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+      e.preventDefault(); e.currentTarget.blur();
+      current = new Date(current.getFullYear(), current.getMonth()-1, 1);
       render(); renderEvents();
     });
     document.getElementById('nextBtn').addEventListener('click', e => {
-      e.preventDefault();
-      e.currentTarget.blur();
-      current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      e.preventDefault(); e.currentTarget.blur();
+      current = new Date(current.getFullYear(), current.getMonth()+1, 1);
       render(); renderEvents();
     });
+
+    /* ── Month picker ───────────────────────────────────────── */
+    const monthPopup = document.getElementById('monthPopup');
+    const yearPopup  = document.getElementById('yearPopup');
+
+    function buildMonthGrid() {
+      const grid = document.getElementById('monthGrid');
+      grid.innerHTML = '';
+      MONTHS_SHORT.forEach((m, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'picker-cell' + (i === current.getMonth() ? ' active' : '');
+        btn.textContent = m;
+        btn.addEventListener('click', () => {
+          current = new Date(current.getFullYear(), i, 1);
+          closeAllPickers(); render(); renderEvents();
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    document.getElementById('monthPick').addEventListener('click', e => {
+      e.stopPropagation();
+      const opening = !monthPopup.classList.contains('open');
+      closeAllPickers();
+      if (opening) { buildMonthGrid(); monthPopup.classList.add('open'); }
+    });
+
+    /* ── Year picker ────────────────────────────────────────── */
+    let yearRangeStart = Math.floor(current.getFullYear() / 12) * 12;
+
+    function buildYearGrid() {
+      const grid = document.getElementById('yearGrid');
+      grid.innerHTML = '';
+      document.getElementById('yearRangeLabel').textContent =
+        `${yearRangeStart} – ${yearRangeStart + 11}`;
+      for (let y = yearRangeStart; y < yearRangeStart + 12; y++) {
+        const btn = document.createElement('button');
+        btn.className = 'picker-cell' + (y === current.getFullYear() ? ' active' : '');
+        btn.textContent = y;
+        btn.addEventListener('click', () => {
+          current = new Date(y, current.getMonth(), 1);
+          closeAllPickers(); render(); renderEvents();
+        });
+        grid.appendChild(btn);
+      }
+    }
+
+    document.getElementById('yearPick').addEventListener('click', e => {
+      e.stopPropagation();
+      const opening = !yearPopup.classList.contains('open');
+      closeAllPickers();
+      if (opening) {
+        yearRangeStart = Math.floor(current.getFullYear() / 12) * 12;
+        buildYearGrid();
+        yearPopup.classList.add('open');
+      }
+    });
+
+    document.getElementById('yearRangePrev').addEventListener('click', e => {
+      e.stopPropagation(); yearRangeStart -= 12; buildYearGrid();
+    });
+    document.getElementById('yearRangeNext').addEventListener('click', e => {
+      e.stopPropagation(); yearRangeStart += 12; buildYearGrid();
+    });
+
+    function closeAllPickers() {
+      monthPopup.classList.remove('open');
+      yearPopup.classList.remove('open');
+    }
+
+    // Close pickers on outside click
+    document.addEventListener('click', e => {
+      if (!document.getElementById('monthLabelWrap').contains(e.target)) closeAllPickers();
+    });
+    document.getElementById('monthLabelWrap').addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('keydown', e => { if (e.key==='Escape') closeAllPickers(); });
 
     /* ── Settings panel ─────────────────────────────────────── */
     const settingsPanel = document.getElementById('settingsPanel');
     const settingsBtn   = document.getElementById('settingsBtn');
 
     settingsBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      settingsPanel.classList.toggle('open');
+      e.stopPropagation(); settingsPanel.classList.toggle('open');
     });
-    document.getElementById('settingsClose').addEventListener('click', () => {
-      settingsPanel.classList.remove('open');
-    });
+    document.getElementById('settingsClose').addEventListener('click', () => settingsPanel.classList.remove('open'));
     document.addEventListener('click', e => {
-      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn)
         settingsPanel.classList.remove('open');
-      }
     });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') settingsPanel.classList.remove('open');
-    });
-    // Prevent panel-internal clicks from closing it
     settingsPanel.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('keydown', e => { if (e.key==='Escape') settingsPanel.classList.remove('open'); });
 
     /* ── Font selection ─────────────────────────────────────── */
     document.getElementById('fontOptions').addEventListener('click', e => {
@@ -983,21 +979,19 @@
     });
 
     /* ── Accent colour ──────────────────────────────────────── */
-    const accentInput    = document.getElementById('accentColorInput');
-    const colorSwatch    = document.getElementById('colorSwatchLarge');
+    const accentInput = document.getElementById('accentColorInput');
+    const colorSwatch = document.getElementById('colorSwatchLarge');
 
     function applyAccent(hex) {
-      document.documentElement.style.setProperty('--primary',      hex);
-      document.documentElement.style.setProperty('--primary-dark', darken(hex, 0.15));
+      document.documentElement.style.setProperty('--primary', hex);
+      document.documentElement.style.setProperty('--primary-dark', darken(hex, .15));
       colorSwatch.style.background = hex;
-      // Also update the event colour picker default if untouched
       if (evColorInput.value === evColorInput.defaultValue) {
         evColorInput.value = hex;
         evColorSwatch.style.background = hex;
       }
       accentInput.defaultValue = hex;
     }
-
     colorSwatch.style.background = accentInput.value;
     accentInput.addEventListener('input', () => applyAccent(accentInput.value));
 
@@ -1008,9 +1002,8 @@
     function applyBgUrl(url) {
       document.body.style.backgroundImage = `url('${url}')`;
       document.body.classList.add('has-bg');
-      removeBgBtn.classList.add('visible');
+      removeBgBtn.classList.add('active');
     }
-
     function applyBgFile(file) {
       if (!file.type.startsWith('image/')) return;
       if (bgObjectURL) URL.revokeObjectURL(bgObjectURL);
@@ -1019,58 +1012,36 @@
     }
 
     document.getElementById('bgInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) applyBgFile(file);
+      const f = e.target.files[0]; if (f) applyBgFile(f);
     });
-
     removeBgBtn.addEventListener('click', () => {
       document.body.style.backgroundImage = '';
       document.body.classList.remove('has-bg');
-      removeBgBtn.classList.remove('visible');
+      removeBgBtn.classList.remove('active');
       document.getElementById('bgInput').value = '';
       if (bgObjectURL) { URL.revokeObjectURL(bgObjectURL); bgObjectURL = null; }
     });
 
-    /* ── Drag-and-drop background ───────────────────────────── */
+    /* ── Drag-and-drop ──────────────────────────────────────── */
     const dropZone = document.getElementById('dropZone');
 
-    // Also allow dropping anywhere on the page body
     [dropZone, document.body].forEach(el => {
-      el.addEventListener('dragover', e => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-      });
-      el.addEventListener('dragleave', e => {
-        if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
-      });
+      el.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+      el.addEventListener('dragleave', e => { if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over'); });
     });
 
+    function handleDrop(e) {
+      e.preventDefault(); dropZone.classList.remove('drag-over');
+      const imgFile = [...(e.dataTransfer.files||[])].find(f => f.type.startsWith('image/'));
+      if (imgFile) { applyBgFile(imgFile); return; }
+      const uri = (e.dataTransfer.getData('text/uri-list')||'').split('\n').map(u=>u.trim()).find(u=>u&&!u.startsWith('#'));
+      if (uri) { applyBgUrl(uri); return; }
+      const html = e.dataTransfer.getData('text/html')||'';
+      const m = html.match(/src=["']([^"']+)["']/);
+      if (m) applyBgUrl(m[1]);
+    }
     dropZone.addEventListener('drop', handleDrop);
     document.body.addEventListener('drop', handleDrop);
-
-    function handleDrop(e) {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-
-      // 1. Local file drag
-      const files = [...(e.dataTransfer.files || [])];
-      const imgFile = files.find(f => f.type.startsWith('image/'));
-      if (imgFile) { applyBgFile(imgFile); return; }
-
-      // 2. URL drag (e.g. dragging image from Google Images)
-      const uriList = e.dataTransfer.getData('text/uri-list');
-      if (uriList) {
-        const url = uriList.split('\n').map(u => u.trim()).find(u => u && !u.startsWith('#'));
-        if (url) { applyBgUrl(url); return; }
-      }
-
-      // 3. HTML containing an <img src="..."> (fallback)
-      const html = e.dataTransfer.getData('text/html');
-      if (html) {
-        const m = html.match(/src=["']([^"']+)["']/);
-        if (m) { applyBgUrl(m[1]); return; }
-      }
-    }
 
     /* ── Dark / light mode ──────────────────────────────────── */
     const html = document.documentElement;
