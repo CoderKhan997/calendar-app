@@ -492,23 +492,33 @@
     .strip-week-sep { width:1.5px;align-self:stretch;background:var(--surface2);border-radius:2px;flex-shrink:0;margin:0 3px; }
 
     /* ── Moon phase indicators ───────────────────────────────── */
+    @keyframes moonGlow {
+      0%,100% { box-shadow:0 0 7px 2px rgba(232,168,32,.45), 0 0 14px 4px rgba(255,220,80,.15); }
+      50%      { box-shadow:0 0 14px 5px rgba(232,168,32,.75), 0 0 28px 10px rgba(255,220,80,.3); }
+    }
+    @keyframes newMoonPulse {
+      0%,100% { opacity:.45; box-shadow:none; }
+      50%      { opacity:.75; box-shadow:0 0 8px 2px rgba(120,110,180,.25); }
+    }
+
+    /* Cell badge (top-left of day cell) */
     .moon-badge {
-      width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-right:auto;
+      width:17px;height:17px;border-radius:50%;flex-shrink:0;margin-right:auto;
     }
     .moon-full-b {
-      background:radial-gradient(circle at 38% 38%,#FFE680 10%,#E8A820 65%,#C47D00 100%);
-      box-shadow:0 0 5px 1px rgba(232,168,32,.5);
+      background:radial-gradient(circle at 36% 34%,#FFF7B0 0%,#FFD234 38%,#E8A820 68%,#B87200 100%);
+      animation:moonGlow 3s ease-in-out infinite;
     }
     .moon-new-b {
       background:transparent;
-      border:1.5px solid var(--on-surface-dim);
-      opacity:.55;
+      border:2px solid var(--on-surface-dim);
+      animation:newMoonPulse 4s ease-in-out infinite;
     }
 
-    /* Moon in event/footer panel */
+    /* Event panel moon row */
     .moon-event-item {
-      display:flex;align-items:center;gap:10px;
-      border-radius:10px;padding:8px 12px;font-size:13px;
+      display:flex;align-items:center;gap:12px;
+      border-radius:10px;padding:10px 12px;
       position:relative;overflow:hidden;
     }
     .moon-event-item::before {
@@ -519,19 +529,29 @@
     .moon-full-item::before { background:#E8A820; }
     .moon-new-item  { background:var(--surface2); }
     .moon-new-item::before  { background:var(--on-surface-dim); }
-    .moon-event-icon {
-      width:18px;height:18px;border-radius:50%;flex-shrink:0;
-    }
-    .moon-full-icon {
-      background:radial-gradient(circle at 38% 38%,#FFE680 10%,#E8A820 65%,#C47D00 100%);
-      box-shadow:0 0 5px rgba(232,168,32,.55);
-    }
-    .moon-new-icon  { background:transparent;border:2px solid var(--on-surface-dim);opacity:.65; }
 
-    /* Moon in day strip */
+    /* Large animated icon inside event panel */
+    .moon-panel-icon {
+      width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    }
+    .moon-panel-full {
+      background:radial-gradient(circle at 36% 34%,#FFF7B0 0%,#FFD234 38%,#E8A820 68%,#B87200 100%);
+      animation:moonGlow 3s ease-in-out infinite;
+    }
+    .moon-panel-new {
+      background:transparent;border:2.5px solid var(--on-surface-dim);
+      animation:newMoonPulse 4s ease-in-out infinite;
+    }
+
+    .moon-info        { display:flex;flex-direction:column;gap:2px;min-width:0; }
+    .moon-info-name   { font-size:13px;font-weight:600; }
+    .moon-info-time   { font-size:11px;color:var(--on-surface-dim); }
+    .moon-info-rise   { font-size:10.5px;color:var(--on-surface-dim);opacity:.8; }
+
+    /* Strip dot */
     .strip-moon { width:5px;height:5px;border-radius:50%;margin:0 auto 1px;flex-shrink:0; }
-    .strip-moon-full { background:#E8A820;box-shadow:0 0 3px rgba(232,168,32,.7); }
-    .strip-moon-new  { border:1px solid var(--on-surface-dim);opacity:.55; }
+    .strip-moon-full { background:#E8A820;animation:moonGlow 3s ease-in-out infinite; }
+    .strip-moon-new  { border:1.5px solid var(--on-surface-dim);animation:newMoonPulse 4s ease-in-out infinite; }
 
     /* ── Two-column page layout ──────────────────────────────── */
     .main-row {
@@ -1047,39 +1067,136 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
-       MOON PHASES
+       MOON PHASES — Meeus Ch.49 exact times + rise/set
     ══════════════════════════════════════════════════════════════ */
-    // Reference: Jan 6 2000 18:14 UTC was a new moon
-    const KNOWN_NM_MS = Date.UTC(2000, 0, 6, 18, 14, 0);
-    const SYNODIC     = 29.530588853; // days
+    const _RAD = Math.PI / 180;
 
-    function getMoonAge(date) {
-      const utcMs  = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-      const elapsed = (utcMs - KNOWN_NM_MS) / 86400000;
-      return ((elapsed % SYNODIC) + SYNODIC) % SYNODIC;
+    // ── Exact phase JDE (Jean Meeus, Astronomical Algorithms Ch.49) ──
+    function _moonPhaseJDE(k) {
+      // k: integer = new moon, integer+0.5 = full moon
+      const T  = k / 1236.85, T2 = T * T;
+      let JDE  = 2451550.09766 + 29.530588861 * k + 0.00015437 * T2;
+      const M  = _RAD * ((  2.5534 +  29.10535669 * k) % 360);
+      const Mp = _RAD * ((201.5643 + 385.81693528 * k + 0.1017438 * T2) % 360);
+      const F  = _RAD * ((160.7108 + 390.67050274 * k - 0.0016341 * T2) % 360);
+      const Om = _RAD * ((124.7746 -  1.56375580  * k + 0.0020691 * T2) % 360);
+      const E  = 1 - 0.002516 * T - 0.0000074 * T2;
+      const isNM = (k === Math.round(k)); // integer k → new moon
+      JDE += (isNM ? -0.40720 : -0.40614) * Math.sin(Mp)
+           + (isNM ?  0.17241 :  0.17302) * E  * Math.sin(M)
+           + (isNM ?  0.01608 :  0.01614) * Math.sin(2 * Mp)
+           + (isNM ?  0.01039 :  0.01043) * Math.sin(2 * F)
+           + (isNM ?  0.00739 :  0.00734) * E  * Math.sin(Mp - M)
+           + (isNM ? -0.00514 : -0.00515) * E  * Math.sin(Mp + M)
+           +  0.00208 * E * E * Math.sin(2 * M)
+           -  0.00111 * Math.sin(Mp - 2 * F)
+           -  0.00057 * Math.sin(Mp + 2 * F)
+           -  0.00042 * Math.sin(3 * Mp)
+           +  0.00056 * E * Math.sin(2 * Mp + M)
+           +  0.00042 * E * Math.sin(M + 2 * F)
+           +  0.00038 * E * Math.sin(M - 2 * F)
+           -  0.00024 * E * Math.sin(2 * Mp - M)
+           -  0.00017 * Math.sin(Om);
+      return JDE;
     }
 
-    // Returns 'new', 'full', or null for a given date
+    function _jdeToMs(jde) { return (jde - 2440587.5) * 86400000; }
+
+    // Build array of {type, time:Date} for a calendar month
+    const _moonCache = {};
+    function _moonEventsForMonth(yr, mo) {
+      const ck = `${yr}-${mo}`;
+      if (_moonCache[ck]) return _moonCache[ck];
+      const s = Date.UTC(yr, mo, 1), e = Date.UTC(yr, mo + 1, 1);
+      // Approximate k for start of month
+      const kEst = (s / 86400000 + 2440587.5 - 2451550.09766) / 29.530588861;
+      const evs = [];
+      for (let k = Math.floor(kEst) - 1; k <= Math.floor(kEst) + 3; k++) {
+        const nmMs = _jdeToMs(_moonPhaseJDE(k));
+        const fmMs = _jdeToMs(_moonPhaseJDE(k + 0.5));
+        if (nmMs >= s && nmMs < e) evs.push({ type: 'new',  time: new Date(nmMs) });
+        if (fmMs >= s && fmMs < e) evs.push({ type: 'full', time: new Date(fmMs) });
+      }
+      return (_moonCache[ck] = evs);
+    }
+
+    // Returns {type, time} or null for a given calendar date
     function moonPhase(date) {
-      const age  = getMoonAge(date);
-      const half = SYNODIC / 2;  // ~14.765
-      // Find day closest to the phase peak by comparing with neighbours
-      const agePrev = getMoonAge(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1));
-      const ageNext = getMoonAge(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));
+      const yr = date.getFullYear(), mo = date.getMonth();
+      const ds = Date.UTC(yr, mo, date.getDate());
+      return _moonEventsForMonth(yr, mo).find(e => {
+        const t = e.time.getTime(); return t >= ds && t < ds + 86400000;
+      }) || null;
+    }
 
-      // New moon: age near 0 — detect the minimum within a 3-day window
-      const distNew      = Math.min(age, SYNODIC - age);
-      const distNewPrev  = Math.min(agePrev, SYNODIC - agePrev);
-      const distNewNext  = Math.min(ageNext, SYNODIC - ageNext);
-      if (distNew < 1.5 && distNew <= distNewPrev && distNew <= distNewNext) return 'new';
+    // ── Moon position (SunCalc-style, accurate ±0.3°) ─────────
+    function _moonCoords(d) { // d = days since J2000
+      const L = _RAD * (218.316 + 13.176396 * d);
+      const M = _RAD * (134.963 + 13.064993 * d);
+      const F = _RAD * ( 93.272 + 13.229350 * d);
+      const l = L + _RAD * 6.289 * Math.sin(M);
+      const b = _RAD * 5.128 * Math.sin(F);
+      const eps = _RAD * 23.439;
+      return {
+        ra:  Math.atan2(Math.sin(l)*Math.cos(eps) - Math.tan(b)*Math.sin(eps), Math.cos(l)),
+        dec: Math.asin( Math.sin(b)*Math.cos(eps) + Math.cos(b)*Math.sin(eps)*Math.sin(l)),
+      };
+    }
+    function _sid(d, lw) { return _RAD * (280.16 + 360.9856235 * d) - lw; }
+    function _alt(H, phi, dec) {
+      return Math.asin(Math.sin(phi)*Math.sin(dec) + Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+    }
+    function _refr(h) { return h < 0 ? 0 : 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179)); }
+    function _moonAlt(tMs, lat, lng) {
+      const d = tMs / 86400000 - 10957.5; // days since J2000
+      const c = _moonCoords(d), H = _sid(d, _RAD * -lng) - c.ra, h = _alt(H, _RAD * lat, c.dec);
+      return h + _refr(h);
+    }
+    const _MR_CORR = _RAD * 0.133; // moon apparent radius correction
 
-      // Full moon: age near SYNODIC/2
-      const distFull     = Math.abs(age     - half);
-      const distFullPrev = Math.abs(agePrev - half);
-      const distFullNext = Math.abs(ageNext - half);
-      if (distFull < 1.5 && distFull <= distFullPrev && distFull <= distFullNext) return 'full';
+    function getMoonRiseSet(date, lat, lng) {
+      const t0 = new Date(date); t0.setHours(0, 0, 0, 0);
+      let h0 = _moonAlt(t0.getTime(), lat, lng) - _MR_CORR;
+      let rise = null, set = null;
+      for (let i = 1; i <= 25; i += 2) {
+        const h1 = _moonAlt(t0.getTime() + i * 3600000,       lat, lng) - _MR_CORR;
+        const h2 = _moonAlt(t0.getTime() + (i + 1) * 3600000, lat, lng) - _MR_CORR;
+        const a = (h0 + h2) / 2 - h1, b = (h2 - h0) / 2;
+        const xe = -b / (2 * a), ye = (a * xe + b) * xe + h1;
+        const disc = b * b - 4 * a * h1;
+        let x1 = 0, x2 = 0, roots = 0;
+        if (disc >= 0) {
+          const dx = Math.sqrt(disc) / (Math.abs(a) * 2);
+          x1 = xe - dx; x2 = xe + dx;
+          if (Math.abs(x1) <= 1) roots++;
+          if (Math.abs(x2) <= 1) roots++;
+          if (x1 < -1) x1 = x2;
+        }
+        if      (roots === 1) { if (h0 < 0) rise = i + x1; else set = i + x1; }
+        else if (roots === 2) { rise = i + (ye < 0 ? x2 : x1); set = i + (ye < 0 ? x1 : x2); }
+        if (rise !== null && set !== null) break;
+        h0 = h2;
+      }
+      return { rise, set }; // hours from local midnight, or null
+    }
 
-      return null;
+    // ── Geolocation (ask once, silently) ──────────────────────
+    let userGeo = null;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => { userGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude }; renderEvents(); },
+        ()  => {} // denied — fall back gracefully
+      );
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function _fmtTime(date) {
+      return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+    function _fmtHours(h) {
+      const m = Math.round(h * 60), hh = Math.floor(m / 60) % 24, mm = m % 60;
+      const ap = hh >= 12 ? 'PM' : 'AM';
+      return `${hh % 12 || 12}:${String(mm).padStart(2, '0')} ${ap}`;
     }
 
     /* ═══════════════════════════════════════════════════════════
@@ -1127,8 +1244,8 @@
 
         // Date badge (top-right) + optional moon badge (top-left)
         const phase = moonPhase(date);
-        const moonEl = phase === 'full' ? `<span class="moon-badge moon-full-b" title="Full Moon"></span>`
-                     : phase === 'new'  ? `<span class="moon-badge moon-new-b"  title="New Moon"></span>`
+        const moonEl = phase?.type === 'full' ? `<span class="moon-badge moon-full-b" title="Full Moon at ${_fmtTime(phase.time)}"></span>`
+                     : phase?.type === 'new'  ? `<span class="moon-badge moon-new-b"  title="New Moon at ${_fmtTime(phase.time)}"></span>`
                      : '';
         cell.insertAdjacentHTML('beforeend',
           `<div class="cal-date-row">${moonEl}<div class="cal-date-badge">${d}</div></div>`);
@@ -1190,10 +1307,20 @@
 
       const phase = moonPhase(selected);
       if (phase) {
+        const isFull = phase.type === 'full';
+        const rs = userGeo ? getMoonRiseSet(selected, userGeo.lat, userGeo.lng) : null;
+        const riseStr = (rs?.rise != null) ? `↑ ${_fmtHours(rs.rise)}` : '';
+        const setStr  = (rs?.set  != null) ? `↓ ${_fmtHours(rs.set)}`  : '';
+        const riseSetLine = [riseStr, setStr].filter(Boolean).join('  ');
         const mItem = document.createElement('div');
-        mItem.className = `moon-event-item ${phase === 'full' ? 'moon-full-item' : 'moon-new-item'}`;
-        mItem.innerHTML = `<div class="moon-event-icon ${phase === 'full' ? 'moon-full-icon' : 'moon-new-icon'}"></div>
-          <span class="event-text">${phase === 'full' ? 'Full Moon' : 'New Moon'}</span>`;
+        mItem.className = `moon-event-item ${isFull ? 'moon-full-item' : 'moon-new-item'}`;
+        mItem.innerHTML = `
+          <div class="moon-panel-icon ${isFull ? 'moon-panel-full' : 'moon-panel-new'}"></div>
+          <div class="moon-info">
+            <div class="moon-info-name">${isFull ? 'Full Moon' : 'New Moon'}</div>
+            <div class="moon-info-time">Peaks at ${_fmtTime(phase.time)}</div>
+            ${riseSetLine ? `<div class="moon-info-rise">${riseSetLine}</div>` : ''}
+          </div>`;
         el.appendChild(mItem);
       }
 
@@ -1249,8 +1376,8 @@
         const sPhase = moonPhase(date);
         if (sPhase) {
           const m=document.createElement('div');
-          m.className=`strip-moon strip-moon-${sPhase}`;
-          m.title=sPhase==='full'?'Full Moon':'New Moon';
+          m.className=`strip-moon strip-moon-${sPhase.type}`;
+          m.title=sPhase.type==='full'?`Full Moon at ${_fmtTime(sPhase.time)}`:`New Moon at ${_fmtTime(sPhase.time)}`;
           wrap.appendChild(m);
         }
         const dow=document.createElement('div'); dow.className='strip-dow'; dow.textContent=DAYS[wd][0];
