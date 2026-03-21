@@ -1252,9 +1252,10 @@
     ══════════════════════════════════════════════════════════════ */
     const accentInput=document.getElementById('accentColorInput');
     const colorSwatch=document.getElementById('colorSwatchLarge');
+    const calScope = document.querySelector('.left-col');
     function applyAccent(hex){
-      document.documentElement.style.setProperty('--primary',hex);
-      document.documentElement.style.setProperty('--primary-dark',darken(hex,.15));
+      calScope.style.setProperty('--primary',hex);
+      calScope.style.setProperty('--primary-dark',darken(hex,.15));
       colorSwatch.style.background=hex;
       if(evColorInput.value===evColorInput.defaultValue){ evColorInput.value=hex; evColorSwatch.style.background=hex; }
       accentInput.defaultValue=hex;
