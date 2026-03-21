@@ -491,6 +491,48 @@
     .strip-num.s-today.s-holiday::before,.strip-num.s-sel.s-holiday::before { background:rgba(255,255,255,.85); }
     .strip-week-sep { width:1.5px;align-self:stretch;background:var(--surface2);border-radius:2px;flex-shrink:0;margin:0 3px; }
 
+    /* ── Moon phase indicators ───────────────────────────────── */
+    .moon-badge {
+      width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-right:auto;
+    }
+    .moon-full-b {
+      background:radial-gradient(circle at 38% 38%,#FFE680 10%,#E8A820 65%,#C47D00 100%);
+      box-shadow:0 0 5px 1px rgba(232,168,32,.5);
+    }
+    .moon-new-b {
+      background:transparent;
+      border:1.5px solid var(--on-surface-dim);
+      opacity:.55;
+    }
+
+    /* Moon in event/footer panel */
+    .moon-event-item {
+      display:flex;align-items:center;gap:10px;
+      border-radius:10px;padding:8px 12px;font-size:13px;
+      position:relative;overflow:hidden;
+    }
+    .moon-event-item::before {
+      content:'';position:absolute;left:0;top:0;bottom:0;
+      width:3px;border-radius:3px 0 0 3px;
+    }
+    .moon-full-item { background:rgba(232,168,32,.09); }
+    .moon-full-item::before { background:#E8A820; }
+    .moon-new-item  { background:var(--surface2); }
+    .moon-new-item::before  { background:var(--on-surface-dim); }
+    .moon-event-icon {
+      width:18px;height:18px;border-radius:50%;flex-shrink:0;
+    }
+    .moon-full-icon {
+      background:radial-gradient(circle at 38% 38%,#FFE680 10%,#E8A820 65%,#C47D00 100%);
+      box-shadow:0 0 5px rgba(232,168,32,.55);
+    }
+    .moon-new-icon  { background:transparent;border:2px solid var(--on-surface-dim);opacity:.65; }
+
+    /* Moon in day strip */
+    .strip-moon { width:5px;height:5px;border-radius:50%;margin:0 auto 1px;flex-shrink:0; }
+    .strip-moon-full { background:#E8A820;box-shadow:0 0 3px rgba(232,168,32,.7); }
+    .strip-moon-new  { border:1px solid var(--on-surface-dim);opacity:.55; }
+
     /* ── Two-column page layout ──────────────────────────────── */
     .main-row {
       display:flex;flex-direction:row;gap:20px;align-items:flex-start;
@@ -1005,6 +1047,42 @@
     }
 
     /* ═══════════════════════════════════════════════════════════
+       MOON PHASES
+    ══════════════════════════════════════════════════════════════ */
+    // Reference: Jan 6 2000 18:14 UTC was a new moon
+    const KNOWN_NM_MS = Date.UTC(2000, 0, 6, 18, 14, 0);
+    const SYNODIC     = 29.530588853; // days
+
+    function getMoonAge(date) {
+      const utcMs  = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+      const elapsed = (utcMs - KNOWN_NM_MS) / 86400000;
+      return ((elapsed % SYNODIC) + SYNODIC) % SYNODIC;
+    }
+
+    // Returns 'new', 'full', or null for a given date
+    function moonPhase(date) {
+      const age  = getMoonAge(date);
+      const half = SYNODIC / 2;  // ~14.765
+      // Find day closest to the phase peak by comparing with neighbours
+      const agePrev = getMoonAge(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1));
+      const ageNext = getMoonAge(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));
+
+      // New moon: age near 0 — detect the minimum within a 3-day window
+      const distNew      = Math.min(age, SYNODIC - age);
+      const distNewPrev  = Math.min(agePrev, SYNODIC - agePrev);
+      const distNewNext  = Math.min(ageNext, SYNODIC - ageNext);
+      if (distNew < 1.5 && distNew <= distNewPrev && distNew <= distNewNext) return 'new';
+
+      // Full moon: age near SYNODIC/2
+      const distFull     = Math.abs(age     - half);
+      const distFullPrev = Math.abs(agePrev - half);
+      const distFullNext = Math.abs(ageNext - half);
+      if (distFull < 1.5 && distFull <= distFullPrev && distFull <= distFullNext) return 'full';
+
+      return null;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
        RENDER CALENDAR
     ══════════════════════════════════════════════════════════════ */
     function render() {
@@ -1047,9 +1125,13 @@
           selected = date; render(); renderEvents();
         });
 
-        // Date badge (top-right)
+        // Date badge (top-right) + optional moon badge (top-left)
+        const phase = moonPhase(date);
+        const moonEl = phase === 'full' ? `<span class="moon-badge moon-full-b" title="Full Moon"></span>`
+                     : phase === 'new'  ? `<span class="moon-badge moon-new-b"  title="New Moon"></span>`
+                     : '';
         cell.insertAdjacentHTML('beforeend',
-          `<div class="cal-date-row"><div class="cal-date-badge">${d}</div></div>`);
+          `<div class="cal-date-row">${moonEl}<div class="cal-date-badge">${d}</div></div>`);
 
         // Preview items (holidays + events, max 2 + overflow)
         const cellHols = hols[k] || [];
@@ -1106,7 +1188,16 @@
         el.appendChild(item);
       });
 
-      if (!list.length && !hols.length) {
+      const phase = moonPhase(selected);
+      if (phase) {
+        const mItem = document.createElement('div');
+        mItem.className = `moon-event-item ${phase === 'full' ? 'moon-full-item' : 'moon-new-item'}`;
+        mItem.innerHTML = `<div class="moon-event-icon ${phase === 'full' ? 'moon-full-icon' : 'moon-new-icon'}"></div>
+          <span class="event-text">${phase === 'full' ? 'Full Moon' : 'New Moon'}</span>`;
+        el.appendChild(mItem);
+      }
+
+      if (!list.length && !hols.length && !phase) {
         el.innerHTML = '<div class="event-none">No events — add one below</div>';
         return;
       }
@@ -1155,6 +1246,13 @@
         const date=new Date(yr,mo,d), k=key(date), wd=date.getDay();
         if (wd===0&&d>1) { const sep=document.createElement('div'); sep.className='strip-week-sep'; strip.appendChild(sep); }
         const wrap=document.createElement('div'); wrap.className='strip-day';
+        const sPhase = moonPhase(date);
+        if (sPhase) {
+          const m=document.createElement('div');
+          m.className=`strip-moon strip-moon-${sPhase}`;
+          m.title=sPhase==='full'?'Full Moon':'New Moon';
+          wrap.appendChild(m);
+        }
         const dow=document.createElement('div'); dow.className='strip-dow'; dow.textContent=DAYS[wd][0];
         const num=document.createElement('div');
         num.className=['strip-num',isToday(date)?'s-today':'',!isToday(date)&&isSel(date)?'s-sel':'',events[k]?.length?'s-event':'',hols[k]?.length?'s-holiday':''].filter(Boolean).join(' ');
