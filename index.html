@@ -1616,82 +1616,121 @@
     .toggle-switch input:checked + .toggle-track::before { transform:translateX(16px); }
 
     /* ── Lunar calendar badges ────────────────────────────────── */
-    /* ── Lunar calendar cell background ──────────────────────── */
-    /* Keyframes */
+    /* ── Lunar calendar cell — moon rises from lower-left ──────── */
+
+    /* Each type gets its own glow keyframe with drop-shadow pulse */
     @keyframes lunarGlowFull {
-      0%,100% { opacity:.52; }
-      50%      { opacity:.78; }
+      0%,100% { opacity:.60; filter:drop-shadow(0 0 5px rgba(215,228,255,.30)) drop-shadow(0 0 12px rgba(195,215,255,.14)); }
+      50%      { opacity:.82; filter:drop-shadow(0 0 9px rgba(215,228,255,.50)) drop-shadow(0 0 20px rgba(195,215,255,.24)); }
     }
     @keyframes lunarGlowNew {
-      0%,100% { opacity:.45; }
-      50%      { opacity:.68; }
+      0%,100% { opacity:.55; filter:drop-shadow(0 0 4px rgba(65,88,195,.18)) drop-shadow(0 0 10px rgba(50,70,175,.08)); }
+      50%      { opacity:.75; filter:drop-shadow(0 0 8px rgba(65,88,195,.32)) drop-shadow(0 0 16px rgba(50,70,175,.16)); }
     }
-    @keyframes lunarGlowEclipse {
-      0%,100% { opacity:.50; transform:scale(1); }
-      50%      { opacity:.80; transform:scale(1.06); }
+    @keyframes lunarGlowEclipseSolar {
+      0%,100% { opacity:.58; filter:drop-shadow(0 0 5px rgba(255,140,0,.28)) drop-shadow(0 0 12px rgba(220,80,0,.12)); }
+      50%      { opacity:.82; filter:drop-shadow(0 0 10px rgba(255,150,0,.50)) drop-shadow(0 0 20px rgba(220,80,0,.22)); }
+    }
+    @keyframes lunarGlowEclipseLunar {
+      0%,100% { opacity:.58; filter:drop-shadow(0 0 5px rgba(190,42,8,.28)) drop-shadow(0 0 12px rgba(150,25,5,.12)); }
+      50%      { opacity:.82; filter:drop-shadow(0 0 10px rgba(190,42,8,.50)) drop-shadow(0 0 20px rgba(150,25,5,.22)); }
     }
 
-    /* Background layer — fills the cell, sits behind all content */
+    /* Shared base — fills cell, z-index below all content */
     .lunar-cell-bg {
       position:absolute; inset:0;
       z-index:0; pointer-events:none;
       border-radius:inherit;
     }
-    /* Lift all direct day-cell children above the bg layer */
+    /* Keep date badges, holiday chips and events above the glow */
     .day-cell > :not(.lunar-cell-bg) { position:relative; z-index:1; }
 
-    /* Full Moon — silver-white glow in bottom-right quadrant */
+    /* ── Full Moon — silver-white disc glowing from lower-left ── */
+    /* Outer soft halo */
     .lunar-cell-bg.moon-full {
-      background: radial-gradient(circle at 72% 72%,
-        rgba(255,255,250,.92) 0%,
-        rgba(228,236,255,.62) 18%,
-        rgba(200,215,255,.30) 36%,
-        rgba(185,205,255,.10) 52%,
-        transparent 68%
-      );
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(255,255,252,.00) 0%,
+          rgba(255,255,252,.00) 10%,
+          rgba(210,222,255,.22) 22%,
+          rgba(185,205,250,.10) 34%,
+          transparent 48%
+        ),
+        radial-gradient(circle at 18% 84%,
+          rgba(255,255,248,1.0) 0%,
+          rgba(245,248,255,.90) 5%,
+          rgba(228,236,255,.70) 11%,
+          rgba(205,218,255,.42) 18%,
+          rgba(185,202,252,.16) 26%,
+          transparent 38%
+        );
       animation: lunarGlowFull 3.2s ease-in-out infinite;
     }
 
-    /* New Moon — deep indigo shadow in bottom-right quadrant */
+    /* ── New Moon — dark disc with subtle earthshine rim ──────── */
     .lunar-cell-bg.moon-new {
-      background: radial-gradient(circle at 72% 72%,
-        rgba(28,22,58,.72) 0%,
-        rgba(18,14,44,.48) 20%,
-        rgba(55,65,155,.22) 40%,
-        rgba(45,55,140,.07) 58%,
-        transparent 72%
-      );
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(22,17,50,.92) 0%,
+          rgba(16,12,38,.82) 7%,
+          rgba(14,10,34,.60) 12%,
+          rgba(48,60,158,.26) 20%,
+          rgba(36,48,142,.10) 30%,
+          transparent 44%
+        );
       animation: lunarGlowNew 4s ease-in-out infinite;
     }
 
-    /* Solar Eclipse — orange-amber corona */
+    /* ── Solar Eclipse — dark disc ringed by amber corona ──────── */
     .lunar-cell-bg.eclipse-solar {
-      background: radial-gradient(circle at 72% 72%,
-        rgba(255,175,0,.45) 0%,
-        rgba(255,100,0,.28) 16%,
-        rgba(210,55,0,.14) 34%,
-        rgba(170,30,0,.05) 52%,
-        transparent 68%
-      );
-      animation: lunarGlowEclipse 2.4s ease-in-out infinite;
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(14,10,32,.95) 0%,
+          rgba(10,7,24,.90) 7%,
+          rgba(255,175,0,.48) 10%,
+          rgba(255,115,0,.30) 15%,
+          rgba(210,65,0,.16) 24%,
+          rgba(170,35,0,.06) 34%,
+          transparent 48%
+        );
+      animation: lunarGlowEclipseSolar 2.6s ease-in-out infinite;
     }
 
-    /* Lunar Eclipse — blood-red penumbra */
+    /* ── Lunar Eclipse — blood-red umbra ──────────────────────── */
     .lunar-cell-bg.eclipse-lunar {
-      background: radial-gradient(circle at 72% 72%,
-        rgba(185,40,10,.58) 0%,
-        rgba(130,20,5,.36) 18%,
-        rgba(80,12,2,.18) 36%,
-        rgba(50,8,0,.06) 52%,
-        transparent 68%
-      );
-      animation: lunarGlowEclipse 2.4s ease-in-out infinite;
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(195,38,8,.95) 0%,
+          rgba(150,24,5,.82) 7%,
+          rgba(105,16,3,.58) 14%,
+          rgba(68,10,2,.28) 24%,
+          rgba(42,6,1,.10) 34%,
+          transparent 48%
+        );
+      animation: lunarGlowEclipseLunar 2.6s ease-in-out infinite;
     }
 
-    /* Compact mode — scale down slightly so it doesn't overpower small cells */
-    .card.card--narrow .lunar-cell-bg {
-      background-size: 70% 70%;
-      opacity: .85;
+    /* Dark-mode variants — boost brightness so moon reads against dark cells */
+    [data-theme="dark"] .lunar-cell-bg.moon-full {
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(255,255,255,1.0) 0%,
+          rgba(242,246,255,.92) 5%,
+          rgba(220,232,255,.68) 12%,
+          rgba(198,216,255,.38) 20%,
+          rgba(178,200,252,.13) 30%,
+          transparent 44%
+        );
+    }
+    [data-theme="dark"] .lunar-cell-bg.moon-new {
+      background:
+        radial-gradient(circle at 18% 84%,
+          rgba(24,19,55,.98) 0%,
+          rgba(17,13,42,.90) 7%,
+          rgba(55,68,172,.38) 18%,
+          rgba(42,55,158,.14) 28%,
+          transparent 44%
+        );
     }
 
     /* ════════════════════════════════════════════════════════════
