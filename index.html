@@ -1616,12 +1616,83 @@
     .toggle-switch input:checked + .toggle-track::before { transform:translateX(16px); }
 
     /* ── Lunar calendar badges ────────────────────────────────── */
-    .lunar-badge {
-      position:absolute; top:3px; right:3px;
-      font-size:11px; line-height:1; pointer-events:none;
-      filter:drop-shadow(0 0 2px rgba(160,180,255,.5));
+    /* ── Lunar calendar cell background ──────────────────────── */
+    /* Keyframes */
+    @keyframes lunarGlowFull {
+      0%,100% { opacity:.52; }
+      50%      { opacity:.78; }
     }
-    .card.card--narrow .lunar-badge { font-size:9px; top:2px; right:1px; }
+    @keyframes lunarGlowNew {
+      0%,100% { opacity:.45; }
+      50%      { opacity:.68; }
+    }
+    @keyframes lunarGlowEclipse {
+      0%,100% { opacity:.50; transform:scale(1); }
+      50%      { opacity:.80; transform:scale(1.06); }
+    }
+
+    /* Background layer — fills the cell, sits behind all content */
+    .lunar-cell-bg {
+      position:absolute; inset:0;
+      z-index:0; pointer-events:none;
+      border-radius:inherit;
+    }
+    /* Lift all direct day-cell children above the bg layer */
+    .day-cell > :not(.lunar-cell-bg) { position:relative; z-index:1; }
+
+    /* Full Moon — silver-white glow in bottom-right quadrant */
+    .lunar-cell-bg.moon-full {
+      background: radial-gradient(circle at 72% 72%,
+        rgba(255,255,250,.92) 0%,
+        rgba(228,236,255,.62) 18%,
+        rgba(200,215,255,.30) 36%,
+        rgba(185,205,255,.10) 52%,
+        transparent 68%
+      );
+      animation: lunarGlowFull 3.2s ease-in-out infinite;
+    }
+
+    /* New Moon — deep indigo shadow in bottom-right quadrant */
+    .lunar-cell-bg.moon-new {
+      background: radial-gradient(circle at 72% 72%,
+        rgba(28,22,58,.72) 0%,
+        rgba(18,14,44,.48) 20%,
+        rgba(55,65,155,.22) 40%,
+        rgba(45,55,140,.07) 58%,
+        transparent 72%
+      );
+      animation: lunarGlowNew 4s ease-in-out infinite;
+    }
+
+    /* Solar Eclipse — orange-amber corona */
+    .lunar-cell-bg.eclipse-solar {
+      background: radial-gradient(circle at 72% 72%,
+        rgba(255,175,0,.45) 0%,
+        rgba(255,100,0,.28) 16%,
+        rgba(210,55,0,.14) 34%,
+        rgba(170,30,0,.05) 52%,
+        transparent 68%
+      );
+      animation: lunarGlowEclipse 2.4s ease-in-out infinite;
+    }
+
+    /* Lunar Eclipse — blood-red penumbra */
+    .lunar-cell-bg.eclipse-lunar {
+      background: radial-gradient(circle at 72% 72%,
+        rgba(185,40,10,.58) 0%,
+        rgba(130,20,5,.36) 18%,
+        rgba(80,12,2,.18) 36%,
+        rgba(50,8,0,.06) 52%,
+        transparent 68%
+      );
+      animation: lunarGlowEclipse 2.4s ease-in-out infinite;
+    }
+
+    /* Compact mode — scale down slightly so it doesn't overpower small cells */
+    .card.card--narrow .lunar-cell-bg {
+      background-size: 70% 70%;
+      opacity: .85;
+    }
 
     /* ════════════════════════════════════════════════════════════
        MOBILE — iPhone X through 17 (portrait & landscape)
@@ -3142,21 +3213,30 @@
           selected = date; render(); renderEvents(); _save();
         });
 
-        // Lunar badge (new/full moon + eclipses) when feature is enabled
-        let lunarBadge = '';
+        // Lunar background glow (new/full moon + eclipses) — sits behind all content
         if (_lunarCalEnabled) {
           const ecl = eclipseForDate(date);
+          let lunarClass = null, lunarTitle = '';
           if (ecl) {
-            lunarBadge = ecl.kind === 'solar' ? '🌑' : '🌕';
-            cell.title = ecl.label;
+            lunarClass = ecl.kind === 'solar' ? 'eclipse-solar' : 'eclipse-lunar';
+            lunarTitle = ecl.label;
           } else {
             const mp = moonPhase(date);
-            if (mp) lunarBadge = mp.type === 'full' ? '🌕' : '🌑';
+            if (mp) {
+              lunarClass = mp.type === 'full' ? 'moon-full' : 'moon-new';
+              lunarTitle = mp.type === 'full' ? 'Full Moon' : 'New Moon';
+            }
+          }
+          if (lunarClass) {
+            const bg = document.createElement('div');
+            bg.className = `lunar-cell-bg ${lunarClass}`;
+            bg.title = lunarTitle;
+            cell.appendChild(bg); // appended first → behind everything else via z-index:0
           }
         }
 
         cell.insertAdjacentHTML('beforeend',
-          `<div class="cal-date-row"><div class="cal-date-badge">${d}</div>${lunarBadge ? `<span class="lunar-badge" title="${lunarBadge === '🌕' ? 'Full Moon' : 'New Moon'}">${lunarBadge}</span>` : ''}</div>`);
+          `<div class="cal-date-row"><div class="cal-date-badge">${d}</div></div>`);
 
         // Preview items (holidays + events, max 2 + overflow)
         const cellHols = hols[k] || [];
