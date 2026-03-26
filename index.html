@@ -1597,6 +1597,32 @@
     .calc-btn.wide { grid-column:span 2; }
     [data-theme="dark"] .calc-btn.op { background:rgba(123,167,188,.18); }
 
+    /* ── Settings toggle switch ───────────────────────────────── */
+    .settings-toggle-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 0; }
+    .toggle-label { font-size:13px; color:var(--on-surface); }
+    .toggle-switch { position:relative; display:inline-block; width:38px; height:22px; flex-shrink:0; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-track {
+      position:absolute; inset:0; border-radius:22px;
+      background:var(--surface2); cursor:pointer;
+      transition:background .2s;
+    }
+    .toggle-track::before {
+      content:''; position:absolute; width:16px; height:16px; border-radius:50%;
+      left:3px; top:3px; background:#fff;
+      transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.25);
+    }
+    .toggle-switch input:checked + .toggle-track { background:var(--primary); }
+    .toggle-switch input:checked + .toggle-track::before { transform:translateX(16px); }
+
+    /* ── Lunar calendar badges ────────────────────────────────── */
+    .lunar-badge {
+      position:absolute; top:3px; right:3px;
+      font-size:11px; line-height:1; pointer-events:none;
+      filter:drop-shadow(0 0 2px rgba(160,180,255,.5));
+    }
+    .card.card--narrow .lunar-badge { font-size:9px; top:2px; right:1px; }
+
     /* ════════════════════════════════════════════════════════════
        MOBILE — iPhone X through 17 (portrait & landscape)
     ════════════════════════════════════════════════════════════ */
@@ -1839,26 +1865,16 @@
 
           <hr class="settings-divider" />
 
-          <!-- Background -->
+          <!-- Lunar events toggle -->
           <div class="settings-section">
-            <div class="section-label">Background</div>
-
-            <div class="section-sublabel">Custom Photo</div>
-            <div class="bg-upload-row">
-              <label class="bg-upload-label">
-                <span class="material-icons-round" style="font-size:20px">add_photo_alternate</span>
-                Choose image
-                <input type="file" id="bgInput" accept="image/*" />
+            <div class="section-label">Calendar</div>
+            <div class="settings-toggle-row">
+              <span class="toggle-label">🌙 Lunar events on calendar</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="lunarCalToggle">
+                <span class="toggle-track"></span>
               </label>
-              <div class="drop-zone" id="dropZone">
-                <span class="material-icons-round" style="font-size:20px">photo_library</span>
-                Drop photo here
-              </div>
             </div>
-            <button id="removeBgBtn">
-              <span class="material-icons-round" style="font-size:16px">hide_image</span>
-              Remove background
-            </button>
           </div>
         </div>
       </div>
@@ -3126,8 +3142,21 @@
           selected = date; render(); renderEvents(); _save();
         });
 
+        // Lunar badge (new/full moon + eclipses) when feature is enabled
+        let lunarBadge = '';
+        if (_lunarCalEnabled) {
+          const ecl = eclipseForDate(date);
+          if (ecl) {
+            lunarBadge = ecl.kind === 'solar' ? '🌑' : '🌕';
+            cell.title = ecl.label;
+          } else {
+            const mp = moonPhase(date);
+            if (mp) lunarBadge = mp.type === 'full' ? '🌕' : '🌑';
+          }
+        }
+
         cell.insertAdjacentHTML('beforeend',
-          `<div class="cal-date-row"><div class="cal-date-badge">${d}</div></div>`);
+          `<div class="cal-date-row"><div class="cal-date-badge">${d}</div>${lunarBadge ? `<span class="lunar-badge" title="${lunarBadge === '🌕' ? 'Full Moon' : 'New Moon'}">${lunarBadge}</span>` : ''}</div>`);
 
         // Preview items (holidays + events, max 2 + overflow)
         const cellHols = hols[k] || [];
@@ -3330,6 +3359,13 @@
     settingsPanel.addEventListener('click',e=>e.stopPropagation());
     document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ settingsPanel.classList.remove('open'); closeAllPickers(); closeAllWidgetPanels(); }});
 
+    /* ── Lunar calendar toggle ──────────────────────────────── */
+    document.getElementById('lunarCalToggle').addEventListener('change', function() {
+      _lunarCalEnabled = this.checked;
+      _save();
+      render();
+    });
+
     /* ═══════════════════════════════════════════════════════════
        FONT SELECTION
     ══════════════════════════════════════════════════════════════ */
@@ -3436,7 +3472,7 @@
     function applyColorBg(hex,el){
       clearBg(false); document.body.style.backgroundColor=hex;
       clearBgClasses(); if(el) el.classList.add('bg-active');
-      document.getElementById('removeBgBtn').classList.add('active');
+      document.getElementById('removeBgBtn')?.classList.add('active');
       _bgState = { type:'color', hex, wpIdx:null, photoDataUrl:null };
       _save();
     }
@@ -3447,7 +3483,7 @@
       document.body.style.backgroundColor=wp.bgColor;
       document.body.classList.add('has-bg');
       clearBgClasses(); if(el) el.classList.add('bg-active');
-      document.getElementById('removeBgBtn').classList.add('active');
+      document.getElementById('removeBgBtn')?.classList.add('active');
       _bgState = { type:'wallpaper', hex:null, wpIdx:i, photoDataUrl:null };
       _save();
     }
@@ -3469,7 +3505,7 @@
         const dataUrl = canvas.toDataURL('image/jpeg', 0.70);
         _bgLayer.style.backgroundImage = `url('${dataUrl}')`;
         document.body.classList.add('has-bg');
-        document.getElementById('removeBgBtn').classList.add('active');
+        document.getElementById('removeBgBtn')?.classList.add('active');
         _bgState = { type:'photo', hex:null, wpIdx:null, photoDataUrl:dataUrl };
         _save();
       };
@@ -3492,39 +3528,22 @@
       document.body.style.backgroundColor=''; document.body.classList.remove('has-bg');
       _bgLayer.style.backgroundImage = '';
       if(full){
-        clearBgClasses(); document.getElementById('removeBgBtn').classList.remove('active');
-        document.getElementById('bgInput').value='';
+        clearBgClasses(); document.getElementById('removeBgBtn')?.classList.remove('active');
+        const _bgi = document.getElementById('bgInput'); if (_bgi) _bgi.value = '';
         if(bgObjectURL){URL.revokeObjectURL(bgObjectURL);bgObjectURL=null;}
         _bgState = { type:'none', hex:null, wpIdx:null, photoDataUrl:null };
         _save();
       }
     }
 
-    document.getElementById('bgInput').addEventListener('change',e=>{ const f=e.target.files[0]; if(f) applyBgFile(f); });
-    document.getElementById('removeBgBtn').addEventListener('click',()=>clearBg(true));
-
-    /* Drag & drop */
-    const dropZone=document.getElementById('dropZone');
-    [dropZone,document.body].forEach(el=>{
-      el.addEventListener('dragover',e=>{ e.preventDefault(); dropZone.classList.add('drag-over'); });
-      el.addEventListener('dragleave',e=>{ if(!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over'); });
-    });
-    function handleDrop(e){
-      e.preventDefault(); dropZone.classList.remove('drag-over');
-      const imgFile=[...(e.dataTransfer.files||[])].find(f=>f.type.startsWith('image/'));
-      if(imgFile){applyBgFile(imgFile);return;}
-      const uri=(e.dataTransfer.getData('text/uri-list')||'').split('\n').map(u=>u.trim()).find(u=>u&&!u.startsWith('#'));
-      if(uri){applyBgUrl(uri);return;}
-      const m=(e.dataTransfer.getData('text/html')||'').match(/src=["']([^"']+)["']/);
-      if(m)applyBgUrl(m[1]);
-    }
-    dropZone.addEventListener('drop',handleDrop);
-    document.body.addEventListener('drop',handleDrop);
+    document.getElementById('bgInput')?.addEventListener('change',e=>{ const f=e.target.files[0]; if(f) applyBgFile(f); });
+    document.getElementById('removeBgBtn')?.addEventListener('click',()=>clearBg(true));
 
     /* ── Early state declarations (must precede _save / _load / applyTheme) ── */
     const ALARMS = [];
     const _alarmFired = new Set();
     let activeCityName = null;
+    let _lunarCalEnabled = false;
     let clockTz = 'America/New_York';
     let _loading = false;
     let _siteBg = 'black'; // default site background
@@ -3571,7 +3590,7 @@
         bgWpIdx: _bgState.wpIdx,
         bgPhoto: _bgState.photoDataUrl,
         siteBg: _siteBg,
-
+        lunarCal: _lunarCalEnabled,
       };
       try { localStorage.setItem(_STORE, JSON.stringify(s)); }
       catch(e) {
@@ -3672,7 +3691,7 @@
           document.body.style.backgroundSize = wp.size;
           document.body.style.backgroundColor = wp.bgColor;
           document.body.classList.add('has-bg');
-          document.getElementById('removeBgBtn').classList.add('active');
+          document.getElementById('removeBgBtn')?.classList.add('active');
           _bgState = { type:'wallpaper', hex:null, wpIdx:s.bgWpIdx, photoDataUrl:null };
           const thumbs = document.querySelectorAll('.wallpaper-thumb');
           if (thumbs[s.bgWpIdx]) thumbs[s.bgWpIdx].classList.add('bg-active');
@@ -3680,14 +3699,19 @@
           clearBg(false);
           document.getElementById('bgLayer').style.backgroundImage = `url('${s.bgPhoto}')`;
           document.body.classList.add('has-bg');
-          document.getElementById('removeBgBtn').classList.add('active');
+          document.getElementById('removeBgBtn')?.classList.add('active');
           _bgState = { type:'photo', hex:null, wpIdx:null, photoDataUrl:s.bgPhoto };
         }
 
         // Site background
         if (s.siteBg) { _siteBg = s.siteBg; _applySiteBgClass(s.siteBg); }
 
-        // Glass theme
+        // Lunar calendar toggle
+        if (s.lunarCal != null) {
+          _lunarCalEnabled = !!s.lunarCal;
+          const tog = document.getElementById('lunarCalToggle');
+          if (tog) tog.checked = _lunarCalEnabled;
+        }
 
       } catch(e) { console.warn('_load failed:', e); }
       _loading = false;
