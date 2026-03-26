@@ -1609,12 +1609,16 @@
       padding-right:  max(14px, env(safe-area-inset-right));
     }
 
-    /* Prevent iOS double-tap zoom on buttons/interactive elements */
+    /* Prevent double-tap zoom on buttons/interactive elements (iOS + Android) */
     button, a, .stack-preview, .day-cell { touch-action: manipulation; }
-    /* Remove iOS tap highlight flash */
+    /* Remove tap highlight flash (iOS + Android Chrome) */
     * { -webkit-tap-highlight-color: transparent; }
-    /* Prevent iOS auto-zoom on input focus (requires font-size ≥ 16px) */
+    /* Prevent iOS/Android auto-zoom on input focus (requires font-size ≥ 16px) */
     input, textarea, select { font-size: max(16px, 1em); }
+    /* Prevent Android Chrome pull-to-refresh interfering with scroll */
+    body { overscroll-behavior-y: contain; }
+    /* Smooth momentum scrolling on iOS */
+    body, .card, .widget-card, .city-list, .todo-body { -webkit-overflow-scrolling: touch; }
 
     @media (max-width: 600px) {
       /* ── Layout ── */
@@ -4274,6 +4278,8 @@
       renderEvents();
       renderMoonCard();
       _save();
+      // Also refresh weather whenever location changes
+      if (typeof _fetchWeather === 'function') _fetchWeather(lat, lng, label);
     }
 
     function renderCityList(query) {
@@ -5103,7 +5109,7 @@
       function _wxCityList(q) {
         const results = q.trim() ? CITIES.filter(c=>c.n.toLowerCase().includes(q.trim().toLowerCase())).slice(0,60) : CITIES.slice(0,60);
         list.innerHTML = results.length
-          ? results.map(c=>`<div class="city-item" data-lat="${c.a}" data-lng="${c.o}" data-name="${c.n}">${c.n}</div>`).join('')
+          ? results.map(c=>`<div class="city-item" data-lat="${c.lat}" data-lng="${c.lng}" data-name="${c.n}">${c.n}</div>`).join('')
           : '<div class="city-no-results">No cities found</div>';
         list.querySelectorAll('.city-item').forEach(item => {
           item.addEventListener('click', () => {
@@ -5174,10 +5180,10 @@
         try { localStorage.setItem(STACK_KEY, JSON.stringify(st)); } catch(e) {}
       }
 
-      // Apply persisted state
+      // Apply persisted state — default to collapsed on first visit
       cards.forEach(c => {
         const id = c.dataset.card;
-        if (openState[id] === false) c.classList.add('collapsed');
+        if (openState[id] !== true) c.classList.add('collapsed');
       });
 
       // Toggle on preview click
