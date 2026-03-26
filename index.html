@@ -5152,6 +5152,12 @@
     // Auto-load if userGeo available
     if (userGeo) _fetchWeather(userGeo.lat, userGeo.lng, activeCityName || 'Current Location');
 
+    // Auto-refresh weather every 30 minutes while the page is open
+    setInterval(() => {
+      const geo = wxGeo || userGeo;
+      if (geo) _fetchWeather(geo.lat, geo.lng, wxCityLabel || activeCityName || 'Current Location');
+    }, 30 * 60 * 1000);
+
     // Initial card size classification (after first paint)
     requestAnimationFrame(() => {
       _updateCardClasses();
